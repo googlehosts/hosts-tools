@@ -8,9 +8,9 @@
 - GNU Linux (bash script)
 - 跨平台的 [**Hozz**](http://ppoffice.github.io/Hozz)
 
-## 现有的自动更新Hosts工具(粗体字为文件夹名)
+## 现有的自动更新Hosts工具
 
- - **WinGUI** : Windows环境下的GUI工具
+ - **QtGUI** : GUI工具
   - 使用 **C++** 构建， GUI 基于 **Qt** 。由 [@racaljk](https://github.com/racaljk) 贡献
 
  - **WinConsole** : Windows环境下的Console工具
