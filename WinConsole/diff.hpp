@@ -1,7 +1,7 @@
 /*
  * The MIT License(MIT)(redefined)
  *
- * Copyright(c) 2016 Too-Naive E-mail:sweheartiii@hotmail.com
+ * Copyright (C) 2016 Too-Naive E-mail:sometimes.naive@hotmail.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files(the "Software"), to deal
@@ -20,6 +20,13 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
+ * If you use the project's source code or its derivative products (including
+ * but not limited to the executable file), it means that you have agreed to the
+ * terms of this license and comply with the terms of the license. If you do not
+ * agree to this license agreement, please do not use this project's source
+ * code and its derivatives (including but not limited to the executable
+ * file).
  */
 
 #pragma once
@@ -37,19 +44,19 @@ bool Func_CheckDiff(const TCHAR *lFilePath, const TCHAR * rFilePath) throw(){
     if (!lBuffer||!rBuffer)
 		_tprintf(_T("Can't allocate memory to buffer in Func_diff\n")),abort();
     do {
-	fread(lBuffer,sizeof(char),BUFFER_SIZE,lFile);
-	fread(rBuffer,sizeof(char),BUFFER_SIZE,rFile);
+    	fread(lBuffer,sizeof(char),BUFFER_SIZE,lFile);
+    	fread(rBuffer,sizeof(char),BUFFER_SIZE,rFile);
         if (memcmp(lBuffer, rBuffer, BUFFER_SIZE)||
 			((!feof(lFile)&&feof(rFile))||(feof(lFile)&&!(feof(rFile))))){
-            delete[] lBuffer;
-            delete[] rBuffer;
+            delete [] lBuffer;
+            delete [] rBuffer;
 		    fclose(lFile);
 		    fclose(rFile);
             return false;
         }
     } while ((!feof(lFile))&&(!feof(rFile)));
-    delete[] lBuffer;
-    delete[] rBuffer;
+    delete [] lBuffer;
+    delete [] rBuffer;
     fclose(lFile);
     fclose(rFile);
     return true;

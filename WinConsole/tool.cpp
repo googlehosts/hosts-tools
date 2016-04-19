@@ -1,7 +1,7 @@
 ﻿/*
  * The MIT License(MIT)(redefined)
  *
- * Copyright(c) 2016 Too-Naive E-mail:sweheartiii@hotmail.com
+ * Copyright (C) 2016 Too-Naive E-mail:sometimes.naive@hotmail.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files(the "Software"), to deal
@@ -20,6 +20,13 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
+ * If you use the project's source code or its derivative products (including
+ * but not limited to the executable file), it means that you have agreed to the
+ * terms of this license and comply with the terms of the license. If you do not
+ * agree to this license agreement, please do not use this project's source
+ * code and its derivatives (including but not limited to the executable
+ * file).
  */
 
 #include <windows.h>
@@ -29,30 +36,49 @@
 #include <tchar.h>
 #include <stdlib.h>
 #include "ptrerr.hpp"
-#include "mitlicense.hpp"
 #include "diff.hpp"
+#include "mitlicense.hpp"
 #include <signal.h>
 
 #define WIN32_LEAN_AND_MEAN
 
 #define DEFBUF(x,y) x[y]=_T("")
 #define THROWERR(x) throw expection(x)
+
+//Hosts file web address set
 #define hostsfile _T("https://raw.githubusercontent.com/racaljk/hosts/master/hosts")
 #define hostsfile1 _T("https://coding.net/u/scaffrey/p/hosts/git/raw/master/hosts")
 #define objectwebsite _T("https://github.com/racaljk/hosts")
-#define ConsoleTitle _T("racaljk-host tools     Build time:Apr. 13th, '16")
+//end.
+
+#define ConsoleTitle _T("racaljk-host tools     Build time:Apr. 19th, '16")
 
 #define CASE(x,y) case x : y; break;
 #define pWait _T("\n    \
 There seems something wrong in download file, we will retry after 5 seconds.\n")
 
+//tmpfile set
 #define DownLocated _T("hosts.tmp")
 #define ChangeCTLR _T("hostsq.tmp")
+//end.
+
 #define BAD_EXIT \
 		_tprintf(_T("Bad Parameters.\nUsing \"-?\" Parameter to show how to use.\n")),\
 		abort();
+
+//debug set
 #define LogFileLocate _T("c:\\Hosts_Tool_log.log")
 #define pipeName _T("\\\\.\\pipe\\hoststoolnamepipe")
+//end.
+
+//for backward compatibility DO NOT CHANGE IT
+TCHAR Sname[]=_T("racaljk-hoststool");
+TCHAR const *SzName[]={
+	Sname
+};
+const TCHAR * szServiceShowName=_T("racaljk-hosts Tool");
+//end
+
 const size_t localbufsize=1024;
 
 struct expection{
@@ -62,12 +88,10 @@ struct expection{
 	}
 };
 
-//for pipe
+//for pipe debug
 #define PIPE_TIMEOUT 5000
 #define BUFSIZE 4096
-
-typedef struct
-{
+typedef struct{
 	OVERLAPPED oOverlap;
 	HANDLE hPipeInst;
 	TCHAR chRequest[BUFSIZE];
@@ -100,19 +124,13 @@ Example:\n\
     *                                            *\n\
     *                                            *\n\
     *                                            *\n\
-    *          Welcome use hosts tools!          *\n\
+    *        Welcome to use hosts tools!         *\n\
     *                                            *\n\
     *                                            *\n\
     *                    Powered by: @Too-Naive  *\n\
     **********************************************")
-//for backward compatibility DO NOT CHANGE IT
-TCHAR Sname[]=_T("racaljk-hoststool");
-TCHAR const *SzName[]={
-	Sname
-};
-//end
 
-
+//Global variable
 SERVICE_STATUS_HANDLE ssh;
 SERVICE_STATUS ss;
 HANDLE lphdThread[]={
@@ -120,7 +138,9 @@ HANDLE lphdThread[]={
 };
 HANDLE hdPipe=INVALID_HANDLE_VALUE;
 bool request_client;
+//end.
 
+//function declaration
 int __fastcall __Check_Parameters(int,TCHAR const**);
 void WINAPI Service_Main(DWORD, LPTSTR *);
 void WINAPI Service_Control(DWORD);
@@ -136,18 +156,21 @@ inline DWORD ___pipeclose();
 DWORD __stdcall OpenPipeService(LPVOID);
 DWORD ___pipesentmessage(const TCHAR *);
 
+//pipe debug area
 void DisconnectAndClose(LPPIPEINST);
 BOOL CreateAndConnectInstance(LPOVERLAPPED);
 BOOL ConnectToNewClient(HANDLE, LPOVERLAPPED);
 inline void GetAnswerToRequest(LPPIPEINST);
 void WINAPI CompletedWriteRoutine(DWORD, DWORD, LPOVERLAPPED);
 void WINAPI CompletedReadRoutine(DWORD, DWORD, LPOVERLAPPED);
-
+//end.
 
 SERVICE_TABLE_ENTRY STE[2]={{Sname,Service_Main},{NULL,NULL}};
+
 //define buffer
 TCHAR DEFBUF(buf1,localbufsize),DEFBUF(buf2,localbufsize),
 	DEFBUF(buf3,localbufsize),DEFBUF(szline,localbufsize);
+
 //define parameters
 enum _Parameters{
 	EXEC_START_NORMAL		=1<<0x00,
@@ -182,8 +205,8 @@ TCHAR const *szParameters[]={
 	_T("-debug-stop"),			//7
 	_T("-debug-start"),			//8
 	_T("-debug-reiu"),			//9
-	_T("-debug-pipe"),		//10
-	_T("--pipe")			//11
+	_T("-debug-pipe"),			//10
+	_T("--pipe")				//11
 };
 
 int __fastcall __Check_Parameters(int argc,TCHAR const **argv){
@@ -233,16 +256,14 @@ int _tmain(int argc,TCHAR const ** argv){
 	return 0;
 }
 
-void __abrt(int _sig){
-//	TerminateThread(lphdThread[0],0);
-	if (_sig==SIGINT) _tprintf(_T("Received signal SIGINT\n"));
-//	___debug_point_reset(DEBUG_SERVICE_STOP);
+void __abrt(int){
+	_tprintf(_T("Received signal SIGINT\n"));
 	request_client=0;
 	_tprintf(_T("Uninstall service.\n"));
 	Func_Service_UnInstall(false);
 	TerminateThread(lphdThread[0],0);
 	CloseHandle(hdPipe);
-	_tprintf(_T("Program is ready to exit.\n"));
+	_tprintf(_T("Program will now exit.\n"));
 	exit(0);
 }
 
@@ -298,7 +319,8 @@ void NormalEntry(){
 		}
 		fclose(fp);fclose(_);
 		fp=NULL,_=NULL;
-		if (!DeleteFile(DownLocated));
+		if (!DeleteFile(DownLocated))
+			Func_FastPMNTS(_T("Delete tmpfile error.(%ld)\n"),GetLastError());
 		if (Func_CheckDiff(ChangeCTLR,buf1)){
 			_tprintf(_T("\t100%%\n\n    diff exited with value 0(0x00)\n    Finish:Hosts file Not update.\n\n"));
 			DeleteFile(ChangeCTLR);
@@ -313,14 +335,16 @@ void NormalEntry(){
 			_tprintf(_T("\t\t100%%\n    Step5:Replace Default Hosts File..."));
 			if (!CopyFile(ChangeCTLR,buf1,FALSE))
 				THROWERR(_T("CopyFile() Error on copy hosts file to system path"));
-			if (!DeleteFile(ChangeCTLR));
+			if (!DeleteFile(ChangeCTLR))
+				Func_FastPMNTS(_T("Delete tmpfile error.(%ld)\n"),GetLastError());
 			_tprintf(_T("Replace File Successfully\n"));
 
 		}
 	}
-	catch(expection runtimeerr){
+	catch(expection _r){
 		_tprintf(_T("\nFatal Error:\n%s (GetLastError():%ld)\n\
-Please contact the application's support team for more information.\n"),runtimeerr.Message,GetLastError());
+Please contact the application's support team for more information.\n"),
+		_r.Message,GetLastError());
 		_tprintf(_T("\n[Debug Message]\n%s\n%s\n%s\n"),buf1,buf2,buf3);
 		abort();
 	}
@@ -351,10 +375,10 @@ void Func_Service_UnInstall(bool _quite){
 You may should delete it manually."));
 		}
 	}
-	catch (expection re){
+	catch (expection _r){
 		_tprintf(_T("\nFatal Error:\n%s (GetLastError():%ld)\n\
 Please contact the application's support team for more information.\n"),
-		re.Message,GetLastError());
+		_r.Message,GetLastError());
 		_tprintf(_T("\n[Debug Message]\n%s\n%s\n"),buf1,buf2);
 		CloseServiceHandle(shSvc);
 		CloseServiceHandle(shMang);
@@ -410,10 +434,10 @@ DO NOT CLOSE THE CONSOLE DIRECT!!!\n"));
 			default : break;
 		}
 	}
-	catch (expection re){
+	catch (expection _r){
 		_tprintf(_T("\nFatal Error:\n%s (GetLastError():%ld)\n\
 Please contact the application's support team for more information.\n"),
-		re.Message,GetLastError());
+		_r.Message,GetLastError());
 		CloseServiceHandle(shSvc);
 		CloseServiceHandle(shMang);
 		abort();
@@ -449,7 +473,7 @@ void Func_Service_Install(bool _q){
 		if (!(shMang=OpenSCManager(NULL,NULL,SC_MANAGER_ALL_ACCESS)))
 			THROWERR(_T("OpenSCManager() failed."));
 		if (_q) _tprintf(_T("    Step3:Write service.\n"));
-		if (!(shSvc=CreateService(shMang,Sname,_T("racaljk-hosts Tool"),
+		if (!(shSvc=CreateService(shMang,Sname,szServiceShowName,
 		SERVICE_ALL_ACCESS,SERVICE_WIN32_OWN_PROCESS,SERVICE_AUTO_START,SERVICE_ERROR_NORMAL,
 			buf2,NULL,NULL,NULL,NULL,NULL))){
 			if (GetLastError()==ERROR_SERVICE_EXISTS){
@@ -460,7 +484,7 @@ void Func_Service_Install(bool _q){
 				if (!DeleteService(shSvc))
 					THROWERR(_T("DeleteService() Error in Install Service."));
 				CloseServiceHandle(shSvc);
-				if (!(shSvc=CreateService(shMang,Sname,_T("racaljk-hosts Tool"),
+				if (!(shSvc=CreateService(shMang,Sname,szServiceShowName,
 				SERVICE_ALL_ACCESS,SERVICE_WIN32_OWN_PROCESS,SERVICE_AUTO_START,SERVICE_ERROR_NORMAL,
 				buf2,NULL,NULL,NULL,NULL,NULL)))
 					THROWERR(_T("CreateService() failed.(2)")),CloseServiceHandle(shMang);
@@ -481,10 +505,10 @@ void Func_Service_Install(bool _q){
 				MB_SETFOREGROUND|MB_ICONINFORMATION);
 		}
 	}
-	catch (expection runtimeError){
+	catch (expection _r){
 		_tprintf(_T("\nFatal Error:\n%s (GetLastError():%ld)\n\
 Please contact the application's support team for more information.\n"),
-		runtimeError.Message,GetLastError());
+		_r.Message,GetLastError());
 		_tprintf(_T("\n[Debug Message]\n%s\n%s\n%s\n"),buf1,buf2,buf3);
 		abort();
 	}
@@ -520,12 +544,11 @@ inline DWORD ___pipeclose(){
 DWORD __stdcall HostThread(LPVOID){
 	SYSTEMTIME st={0,0,0,0,0,0,0,0};
 	FILE * fp=NULL,*_=NULL;
-	Func_SetErrorFile(LogFileLocate,_T("a+"));
 	if (!GetEnvironmentVariable(_T("SystemRoot"),buf3,BUFSIZ))
 		Func_PMNTTS(_T("GetEnvironmentVariable() Error!(GetLastError():%ld)\n\
 \tCannot get system path!"),GetLastError()),abort();
 	_stprintf(buf1,_T("%s\\system32\\drivers\\etc\\hosts"),buf3);
-	Func_PMNTTS(_T("[Debug Message]:%d\n"),request_client);
+//	Func_PMNTTS(_T("[Debug Message]:%d\n"),request_client);
 	if (request_client) ___pipeopen(),___pipesentmessage(_T("\nMessage from service:\n\n"));
 	Func_PMNTTS(_T("Open log file.\n"));
 	___checkEx(_T("LICENSE:MIT LICENSE\n"),1);
@@ -551,18 +574,21 @@ DWORD __stdcall HostThread(LPVOID){
 			}
 			fclose(fp);fclose(_);
 			fp=NULL,_=NULL;
-			if (!DeleteFile(DownLocated));
+			if (!DeleteFile(DownLocated))
+				Func_FastPMNTS(_T("Delete tmpfile error.(%ld)\n"),GetLastError());;
 			if (Func_CheckDiff(ChangeCTLR,buf1)){
 				___autocheckmess(_T("Finish:Hosts file Not update.\n"));
 				DeleteFile(ChangeCTLR);
 			}
 			else {
-				if (!SetFileAttributes(buf1,FILE_ATTRIBUTE_NORMAL));//for avoid CopyFile failed.
+				if (!SetFileAttributes(buf1,FILE_ATTRIBUTE_NORMAL))
+					Func_FastPMNTS(_T("SetFileAttributes() Error (%ld)\n"),GetLastError());//for avoid CopyFile failed.
 				if (!CopyFile(buf1,buf2,FALSE))
 					THROWERR(_T("CopyFile() Error on copy a backup file"));
 				if (!CopyFile(ChangeCTLR,buf1,FALSE))
 					THROWERR(_T("CopyFile() Error on copy hosts file to system path"));
-				if (!DeleteFile(ChangeCTLR));
+				if (!DeleteFile(ChangeCTLR))
+					Func_FastPMNTS(_T("Delete tmpfile error.(%ld)\n"),GetLastError());
 				___autocheckmess(_T("Replace File Successfully\n"));
 			}
 		}
@@ -584,7 +610,10 @@ Please contact the application's support team for more information.\n"),runtimee
 }
 
 void WINAPI Service_Main(DWORD,LPTSTR *){
-	if (!(ssh=RegisterServiceCtrlHandler(Sname,Service_Control)));
+	Func_SetErrorFile(LogFileLocate,_T("a+"));
+	if (!(ssh=RegisterServiceCtrlHandler(Sname,Service_Control)))
+		Func_FastPMNTS(_T("RegisterServiceCtrlHandler() Error with %ld \n\
+Cannot start service!\n"),GetLastError()),abort();
 	ss.dwServiceType=SERVICE_WIN32_OWN_PROCESS;
 	ss.dwCurrentState=SERVICE_START_PENDING;
 	ss.dwControlsAccepted=SERVICE_ACCEPT_STOP|SERVICE_ACCEPT_SHUTDOWN;
@@ -597,7 +626,16 @@ void WINAPI Service_Main(DWORD,LPTSTR *){
 	ss.dwCheckPoint=0;
 	ss.dwWaitHint=0;
 	SetServiceStatus(ssh,&ss);
-	if (!(lphdThread[0]=CreateThread(NULL,0,HostThread,NULL,0,NULL)));
+	if (!(lphdThread[0]=CreateThread(NULL,0,HostThread,NULL,0,NULL))){
+		Func_FastPMNTS(_T("CreateThread() Error with %ld \n\
+Cannot start main thread to update hosts!\n"),GetLastError());
+		ss.dwWin32ExitCode=ERROR_SERVICE_NO_THREAD;
+		ss.dwCurrentState=SERVICE_STOPPED;
+		ss.dwCheckPoint=1;
+		ss.dwWaitHint=0;
+		SetServiceStatus(ssh,&ss);
+		abort();
+	}
 	WaitForSingleObject(lphdThread[0],INFINITE);
 	ss.dwCurrentState=SERVICE_STOPPED;
 	ss.dwCheckPoint=0;
@@ -633,7 +671,7 @@ DWORD __stdcall OpenPipeService(LPVOID){
 	DWORD dwWait, cbRet;
 	BOOL fSuccess, fPendingIO;
 	if (!(hConnectEvent = CreateEvent(NULL,TRUE,TRUE,NULL)))
-		return _tprintf(_T("CreateEvent failed with %ld.\n"), GetLastError());
+		return 0*_tprintf(_T("CreateEvent failed with %ld.\n"), GetLastError());
 	oConnect.hEvent = hConnectEvent;
 	fPendingIO = CreateAndConnectInstance(&oConnect);
 	while (1){
@@ -658,6 +696,7 @@ DWORD __stdcall OpenPipeService(LPVOID){
 	}
 	return 0;
 }
+
 void WINAPI CompletedWriteRoutine(DWORD dwErr,DWORD cbWritten,LPOVERLAPPED lpOverLap){
 	LPPIPEINST lpPipeInst;
 	BOOL fRead = FALSE;

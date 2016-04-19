@@ -21,14 +21,16 @@
   <ItemGroup>
     <ClInclude Include="..\..\download.hpp" />
     <ClInclude Include="..\..\ptrerr.hpp" />
+    <ClInclude Include="..\..\diff.hpp" />
+    <ClInclude Include="..\..\mitlicense.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\hosts_tool.cpp" />
+    <ClCompile Include="..\..\tool.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{98D6ADA9-79C7-4808-AAC6-DDC417BFA6C9}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>HostsToolforWindows</RootNamespace>
+    <RootNamespace>WinConsole</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
