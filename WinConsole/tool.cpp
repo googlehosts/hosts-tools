@@ -1,4 +1,4 @@
-﻿/*
+/*
  * The MIT License(MIT)(redefined)
  *
  * Copyright (C) 2016 Too-Naive E-mail:sometimes.naive@hotmail.com
@@ -66,9 +66,13 @@ There seems something wrong in download file, we will retry after 5 seconds.\n")
 		_tprintf(_T("Bad Parameters.\nUsing \"-?\" Parameter to show how to use.\n")),\
 		abort();
 
+#define Ts_(x) if (!bReserved) _tprintf(x)
+
 //debug set
 #define LogFileLocate _T("c:\\Hosts_Tool_log.log")
 #define pipeName _T("\\\\.\\pipe\\hoststoolnamepipe")
+#define szErrMeg _T("\nFatal Error:\n%s (GetLastError():%ld)\n\
+Please contact the application's support team for more information.\n")
 //end.
 
 //for backward compatibility DO NOT CHANGE IT
@@ -113,7 +117,7 @@ Options:\n\
     -fi   : Install Auto-Update hosts service(Service Name:%s).\n\
     -fu   : Uninstall service.\n\
     -show : Show the MIT license(redefined)\n\
-	--debug-pipe : Debug Mode(reserved)\n\
+    --debug-pipe : Debug Mode(reserved)\n\
 Example:\n\
     hosts_tool -fi\n\n\
     If you need more imformation about debug mode,\n\
@@ -137,7 +141,7 @@ HANDLE lphdThread[]={
 	INVALID_HANDLE_VALUE,INVALID_HANDLE_VALUE
 };
 HANDLE hdPipe=INVALID_HANDLE_VALUE;
-bool request_client;
+bool request_client,bReserved;
 //end.
 
 //function declaration
@@ -147,7 +151,7 @@ void WINAPI Service_Control(DWORD);
 DWORD CALLBACK Main_Thread(LPVOID);
 void Func_Service_Install(bool);
 void Func_Service_UnInstall(bool);
-void NormalEntry();
+DWORD __stdcall NormalEntry(LPVOID);
 DWORD __stdcall HostThread(LPVOID);
 void ___debug_point_reset(int);
 inline void __show_str(TCHAR const *,TCHAR const *);
@@ -220,7 +224,8 @@ int __fastcall __Check_Parameters(int argc,TCHAR const **argv){
 	if (argc==3 && !_tcscmp(argv[2],szParameters[11])) request_client=1;
 		else if (argc==3 && _tcscmp(argv[2],szParameters[11])) BAD_EXIT;
 	switch (i){
-		case  0: return EXEC_START_SERVICE;
+		case  0: bReserved=true;
+				 return EXEC_START_SERVICE;
 		case  1: return EXEC_START_INSTALL_SERVICE;
 		case  2: return EXEC_START_UNINSTALL_SERVICE;
 		case  6:
@@ -240,7 +245,7 @@ int __fastcall __Check_Parameters(int argc,TCHAR const **argv){
 int _tmain(int argc,TCHAR const ** argv){
 	SetConsoleTitle(ConsoleTitle);
 	switch (__Check_Parameters(argc,argv)){
-		CASE(EXEC_START_NORMAL,NormalEntry());
+		CASE(EXEC_START_NORMAL,NormalEntry(static_cast<LPVOID>(&bReserved)));
 		CASE(EXEC_START_INSTALL_SERVICE,Func_Service_Install(true));
 		CASE(EXEC_START_UNINSTALL_SERVICE,Func_Service_UnInstall(true));
 		CASE(EXEC_START_SERVICE,StartServiceCtrlDispatcher(STE));
@@ -274,83 +279,6 @@ inline void __show_str(TCHAR const* st,TCHAR const * _ingore){
 	return ;
 }
 
-inline void __fastcall ___autocheckmess(const TCHAR * szPstr){
-	if (!request_client)
-		Func_FastPMNTS(szPstr);
-	else
-		___pipesentmessage(szPstr);
-}
-
-inline void __fastcall ___checkEx(const TCHAR * szPstr,bool space_need){
-	if (!request_client)
-		if (!space_need) Func_FastPMNSS(szPstr);
-		else Func_FastPMNTS(szPstr);
-	else
-		___pipesentmessage(szPstr);
-}
-
-void NormalEntry(){
-	SYSTEMTIME st={0,0,0,0,0,0,0,0};
-	FILE * fp=NULL,*_=NULL;
-	GetLocalTime(&st);
-	_tprintf(_T("    LICENSE:MIT LICENSE\n%s\n    Copyright (C) 2016 @Too-Naive\n"),welcomeShow);
-	_tprintf(_T("    Project website:%s\n"),objectwebsite);
-	_tprintf(_T("    Bug report:sweheartiii[at]hotmail.com \n\t       Or open new issue\n\n\n"));
-	_tprintf(_T("    Start replace hosts file:\n    Step1:Get System Driver..."));
-	try {
-		if (!GetEnvironmentVariable(_T("SystemRoot"),buf3,BUFSIZ))
-			THROWERR(_T("GetEnvironmentVariable() Error!\n\tCannot get system path!"));
-		_stprintf(buf1,_T("%s\\system32\\drivers\\etc\\hosts"),buf3);
-		_stprintf(buf2,_T("%s\\system32\\drivers\\etc\\hosts.%04d%02d%02d.%02d%02d%02d"),
-		buf3,st.wYear,st.wMonth,st.wDay,st.wHour,st.wMinute,st.wSecond);
-		_tprintf(_T("\t\tDone.\n    Step2:Download hosts file..."));
-		//download
-		for (int errcunt=0;!Func_Download(hostsfile,DownLocated)&&
-			!Func_Download(hostsfile1,DownLocated);errcunt++,_tprintf(pWait),
-			Sleep(5000),_tprintf(_T("\tDownload hosts file...")))
-					if (errcunt>2) THROWERR(_T("DownLoad hosts file Error!"));
-		//end.
-		_tprintf(_T("\t100%%\n    Step3:Change Line Endings..."));
-		if (!((fp=_tfopen(DownLocated,_T("r"))) && (_=_tfopen(ChangeCTLR,_T("w")))))
-			THROWERR(_T("Open file Error!"));
-		while (!feof(fp)){
-			_fgetts(szline,1000,fp);
-			_fputts(szline,_);
-		}
-		fclose(fp);fclose(_);
-		fp=NULL,_=NULL;
-		if (!DeleteFile(DownLocated))
-			Func_FastPMNTS(_T("Delete tmpfile error.(%ld)\n"),GetLastError());
-		if (Func_CheckDiff(ChangeCTLR,buf1)){
-			_tprintf(_T("\t100%%\n\n    diff exited with value 0(0x00)\n    Finish:Hosts file Not update.\n\n"));
-			DeleteFile(ChangeCTLR);
-			system("pause");
-			return ;
-		}
-		else {
-			_tprintf(_T("\t100%%\n    Step4:Copy Backup File..."));
-			if (!SetFileAttributes(buf1,FILE_ATTRIBUTE_NORMAL)); //for avoid CopyFile failed.
-			if (!CopyFile(buf1,buf2,FALSE))
-				THROWERR(_T("CopyFile() Error on copy a backup file"));
-			_tprintf(_T("\t\t100%%\n    Step5:Replace Default Hosts File..."));
-			if (!CopyFile(ChangeCTLR,buf1,FALSE))
-				THROWERR(_T("CopyFile() Error on copy hosts file to system path"));
-			if (!DeleteFile(ChangeCTLR))
-				Func_FastPMNTS(_T("Delete tmpfile error.(%ld)\n"),GetLastError());
-			_tprintf(_T("Replace File Successfully\n"));
-
-		}
-	}
-	catch(expection _r){
-		_tprintf(_T("\nFatal Error:\n%s (GetLastError():%ld)\n\
-Please contact the application's support team for more information.\n"),
-		_r.Message,GetLastError());
-		_tprintf(_T("\n[Debug Message]\n%s\n%s\n%s\n"),buf1,buf2,buf3);
-		abort();
-	}
-	MessageBox(NULL,_T("Hosts File Set Success!"),_T("Congratulations!"),MB_ICONINFORMATION|MB_SETFOREGROUND);
-	return ;
-}
 
 void Func_Service_UnInstall(bool _quite){
 	SC_HANDLE shMang=NULL,shSvc=NULL;
@@ -518,6 +446,21 @@ Please contact the application's support team for more information.\n"),
 	return ;
 }
 
+inline void __fastcall ___autocheckmess(const TCHAR * szPstr){
+	if (!request_client)
+		Func_FastPMNTS(szPstr);
+	else
+		___pipesentmessage(szPstr);
+}
+
+inline void __fastcall ___checkEx(const TCHAR * szPstr,bool space_need){
+	if (!request_client)
+		if (!space_need) Func_FastPMNSS(szPstr);
+		else Func_FastPMNTS(szPstr);
+	else
+		___pipesentmessage(szPstr);
+}
+
 HANDLE ___pipeopen(){
 	while (1){
 		if ((hdPipe = CreateFile(pipeName,GENERIC_READ|GENERIC_WRITE,0,
@@ -541,31 +484,55 @@ inline DWORD ___pipeclose(){
 	return GetLastError();
 }
 
-DWORD __stdcall HostThread(LPVOID){
+inline void __fastcall _perrtext(TCHAR * _str,bool _Reserved){
+	if (!bReserved)	_tprintf(_str);
+	else if (_Reserved) Func_FastPMNTS(_str);
+		 else Func_FastPMNSS(_str);
+	return ;
+}
+
+DWORD __stdcall NormalEntry(LPVOID lp_bool_is_service){
 	SYSTEMTIME st={0,0,0,0,0,0,0,0};
 	FILE * fp=NULL,*_=NULL;
-	if (!GetEnvironmentVariable(_T("SystemRoot"),buf3,BUFSIZ))
-		Func_PMNTTS(_T("GetEnvironmentVariable() Error!(GetLastError():%ld)\n\
+	if (!*(static_cast<bool*>(lp_bool_is_service))){
+		_tprintf(_T("    LICENSE:MIT LICENSE\n%s\n    Copyright (C) 2016 @Too-Naive\n"),welcomeShow);
+		_tprintf(_T("    Project website:%s\n"),objectwebsite);
+		_tprintf(_T("    Bug report:sweheartiii[at]hotmail.com \n\t       Or open new issue\n\n\n"));
+		_tprintf(_T("    Start replace hosts file:\n    Step1:Get System Driver..."));
+	}
+	else{
+		if (!GetEnvironmentVariable(_T("SystemRoot"),buf3,BUFSIZ))
+			Func_PMNTTS(_T("GetEnvironmentVariable() Error!(GetLastError():%ld)\n\
 \tCannot get system path!"),GetLastError()),abort();
-	_stprintf(buf1,_T("%s\\system32\\drivers\\etc\\hosts"),buf3);
-//	Func_PMNTTS(_T("[Debug Message]:%d\n"),request_client);
-	if (request_client) ___pipeopen(),___pipesentmessage(_T("\nMessage from service:\n\n"));
-	Func_PMNTTS(_T("Open log file.\n"));
-	___checkEx(_T("LICENSE:MIT LICENSE\n"),1);
-	___checkEx(_T("Copyright (C) 2016 Too-Naive\n"),0);
-	___checkEx(_T("Bug report:sweheartiii[at]hotmail.com\n"),0);
-	___checkEx(_T("           Or open new issue.(https://github.com/racaljk/hosts)\n"),0);
-	while (1){
+		_stprintf(buf1,_T("%s\\system32\\drivers\\etc\\hosts"),buf3);
+		if (request_client) ___pipeopen(),___pipesentmessage(_T("\nMessage from service:\n\n"));
+		Func_PMNTTS(_T("Open log file.\n"));
+		___checkEx(_T("LICENSE:MIT LICENSE\n"),1);
+		___checkEx(_T("Copyright (C) 2016 Too-Naive\n"),0);
+		___checkEx(_T("Bug report:sweheartiii[at]hotmail.com\n"),0);
+		___checkEx(_T("           Or open new issue.(https://github.com/racaljk/hosts)\n"),0);
+	}
+	while (bReserved){
 		Sleep(request_client?0:60000);//Waiting for network
 		GetLocalTime(&st);
-		_stprintf(buf2,_T("%s\\system32\\drivers\\etc\\hosts.%04d%02d%02d.%02d%02d%02d"),
-		buf3,st.wYear,st.wMonth,st.wDay,st.wHour,st.wMinute,st.wSecond);
 		___autocheckmess(_T("Start replace hosts file.\n"));
 		try {
-			for (int errcunt=0;!Func_Download(hostsfile1,DownLocated)&&
-				!Func_Download(hostsfile,DownLocated);errcunt++,Sleep(request_client?1000:10000))
-				if (errcunt>1) THROWERR(_T("DownLoad hosts file Error!"));
-
+			if (!bReserved)	if (!GetEnvironmentVariable(_T("SystemRoot"),buf3,BUFSIZ))
+				THROWERR(_T("GetEnvironmentVariable() Error!\n\tCannot get system path!"));
+			_stprintf(buf1,_T("%s\\system32\\drivers\\etc\\hosts"),buf3);
+			_stprintf(buf2,_T("%s\\system32\\drivers\\etc\\hosts.%04d%02d%02d.%02d%02d%02d"),
+			buf3,st.wYear,st.wMonth,st.wDay,st.wHour,st.wMinute,st.wSecond);
+			if (!bReserved) _tprintf(_T("\t\tDone.\n    Step2:Download hosts file..."));
+			//download
+			for (int errcunt=0;(!Func_Download(hostsfile,DownLocated)&&!Func_Download(hostsfile1,DownLocated));errcunt++){
+						if (errcunt>2) THROWERR(_T("DownLoad hosts file Error!"));
+						else if (!bReserved) {
+							_tprintf(pWait);
+							Sleep(bReserved?(request_client?1000:10000):5000);
+							if (!bReserved) _tprintf(_T("\tDownload hosts file...");
+						}
+			}
+			//end.
 			if (!((fp=_tfopen(DownLocated,_T("r"))) && (_=_tfopen(ChangeCTLR,_T("w")))))
 				THROWERR(_T("Open file Error!"));
 			while (!feof(fp)){
@@ -575,39 +542,62 @@ DWORD __stdcall HostThread(LPVOID){
 			fclose(fp);fclose(_);
 			fp=NULL,_=NULL;
 			if (!DeleteFile(DownLocated))
-				Func_FastPMNTS(_T("Delete tmpfile error.(%ld)\n"),GetLastError());;
+					Func_FastPMNTS(_T("Delete tmpfile error.(%ld)\n"),GetLastError());;
+			if (!bReserved) _tprintf(_T("\t100%%\n    Step3:Change Line Endings..."));
+			if (!((fp=_tfopen(DownLocated,_T("r"))) && (_=_tfopen(ChangeCTLR,_T("w")))))
+				THROWERR(_T("Open file Error!"));
+			while (!feof(fp)){
+				_fgetts(szline,1000,fp);
+				_fputts(szline,_);
+			}
+			fclose(fp);fclose(_);
+			fp=NULL,_=NULL;
+			if (!DeleteFile(DownLocated))
+				Func_FastPMNTS(_T("Delete tmpfile error.(%ld)\n"),GetLastError());
 			if (Func_CheckDiff(ChangeCTLR,buf1)){
-				___autocheckmess(_T("Finish:Hosts file Not update.\n"));
+				if (!bReserved) _tprintf(_T("\t100%%\n\n    diff exited with value 0(0x00)\n\
+	    Finish:Hosts file Not update.\n\n"));
+				else ___autocheckmess(_T("Finish:Hosts file Not update.\n"));
 				DeleteFile(ChangeCTLR);
+				if (!bReserved) {system("pause");return GetLastError();}
 			}
 			else {
-				if (!SetFileAttributes(buf1,FILE_ATTRIBUTE_NORMAL))
-					Func_FastPMNTS(_T("SetFileAttributes() Error (%ld)\n"),GetLastError());//for avoid CopyFile failed.
+				if (!bReserved) _tprintf(_T("\tDone.\n    Step4:Copy Backup File..."));
+				if (!SetFileAttributes(buf1,FILE_ATTRIBUTE_NORMAL)); //for avoid CopyFile failed.
 				if (!CopyFile(buf1,buf2,FALSE))
 					THROWERR(_T("CopyFile() Error on copy a backup file"));
+				if (!bReserved) _tprintf(_T("\t\tDone.\n    Step5:Replace Default Hosts File..."));
 				if (!CopyFile(ChangeCTLR,buf1,FALSE))
 					THROWERR(_T("CopyFile() Error on copy hosts file to system path"));
 				if (!DeleteFile(ChangeCTLR))
-					Func_FastPMNTS(_T("Delete tmpfile error.(%ld)\n"),GetLastError());
-				___autocheckmess(_T("Replace File Successfully\n"));
+					_perrtext(_T("Delete tmpfile error.\n"),1);
+				if (!bReserved) _tprintf(_T("Replace File Successfully\n"));
+				else ___autocheckmess(_T("Replace File Successfully\n"));
 			}
-		}
 		catch(expection runtimeerr){
+		if (!bReserved){
 			if (!request_client){
 				Func_FastPMNTS(_T("Fatal Error:\n"));
 				Func_FastPMNSS(_T("%s (GetLastError():%ld)\n"),runtimeerr.Message,GetLastError());
 				Func_FastPMNSS(_T("Please contact the application's support team for more information.\n"));
 			}
 			else {
-				_stprintf(szline,_T("Fatal Error:\n%s (GetLastError():%ld)\n\
-Please contact the application's support team for more information.\n"),runtimeerr.Message,GetLastError());
+				_stprintf(szline,szErrMeg,runtimeerr.Message,GetLastError());
 				___pipesentmessage(szline);
 			}
 		}
+		else{
+			_tprintf(szErrMeg,runtimeerr.Message,GetLastError());
+			_tprintf(_T("\n[Debug Message]\n%s\n%s\n%s\n"),buf1,buf2,buf3);
+			abort();
+		}
 		Sleep(request_client?5000:(29*60000));
 	}
+	if (!bReserved) MessageBox(NULL,_T("Hosts File Set Success!"),
+					_T("Congratulations!"),MB_ICONINFORMATION|MB_SETFOREGROUND);
 	return GetLastError();
 }
+
 
 void WINAPI Service_Main(DWORD,LPTSTR *){
 	Func_SetErrorFile(LogFileLocate,_T("a+"));
