@@ -66,8 +66,6 @@ There seems something wrong in download file, we will retry after 5 seconds.\n")
 		_tprintf(_T("Bad Parameters.\nUsing \"-?\" Parameter to show how to use.\n")),\
 		abort();
 
-#define Ts_(x) if (!bReserved) _tprintf(x)
-
 //debug set
 #define LogFileLocate _T("c:\\Hosts_Tool_log.log")
 #define pipeName _T("\\\\.\\pipe\\hoststoolnamepipe")
@@ -484,7 +482,7 @@ inline DWORD ___pipeclose(){
 	return GetLastError();
 }
 
-inline void __fastcall _perrtext(TCHAR * _str,bool _Reserved){
+inline void __fastcall _perrtext(const TCHAR * _str,bool _Reserved){
 	if (!bReserved)	_tprintf(_str);
 	else if (_Reserved) Func_FastPMNTS(_str);
 		 else Func_FastPMNSS(_str);
@@ -524,14 +522,14 @@ DWORD __stdcall NormalEntry(LPVOID lp_bool_is_service){
 			buf3,st.wYear,st.wMonth,st.wDay,st.wHour,st.wMinute,st.wSecond);
 			if (!bReserved) _tprintf(_T("\t\tDone.\n    Step2:Download hosts file..."));
 			//download
-			for (int errcunt=0;(!Func_Download(hostsfile,DownLocated)&&!Func_Download(hostsfile1,DownLocated));errcunt++){
-						if (errcunt>2) THROWERR(_T("DownLoad hosts file Error!"));
-						else if (!bReserved) {
-							_tprintf(pWait);
-							Sleep(bReserved?(request_client?1000:10000):5000);
-							if (!bReserved) _tprintf(_T("\tDownload hosts file...");
-						}
-			}
+			for (int errcunt=0;(!Func_Download(hostsfile,DownLocated)&&
+				!Func_Download(hostsfile1,DownLocated));errcunt++)
+					if (errcunt>2) THROWERR(_T("DownLoad hosts file Error!"));
+					else if (!bReserved) {
+						_tprintf(pWait);
+						Sleep(bReserved?(request_client?1000:10000):5000);
+						if (!bReserved) _tprintf(_T("\tDownload hosts file..."));
+					}
 			//end.
 			if (!((fp=_tfopen(DownLocated,_T("r"))) && (_=_tfopen(ChangeCTLR,_T("w")))))
 				THROWERR(_T("Open file Error!"));
@@ -556,7 +554,7 @@ DWORD __stdcall NormalEntry(LPVOID lp_bool_is_service){
 				Func_FastPMNTS(_T("Delete tmpfile error.(%ld)\n"),GetLastError());
 			if (Func_CheckDiff(ChangeCTLR,buf1)){
 				if (!bReserved) _tprintf(_T("\t100%%\n\n    diff exited with value 0(0x00)\n\
-	    Finish:Hosts file Not update.\n\n"));
+Finish:Hosts file Not update.\n\n"));
 				else ___autocheckmess(_T("Finish:Hosts file Not update.\n"));
 				DeleteFile(ChangeCTLR);
 				if (!bReserved) {system("pause");return GetLastError();}
@@ -574,24 +572,26 @@ DWORD __stdcall NormalEntry(LPVOID lp_bool_is_service){
 				if (!bReserved) _tprintf(_T("Replace File Successfully\n"));
 				else ___autocheckmess(_T("Replace File Successfully\n"));
 			}
-		catch(expection runtimeerr){
-		if (!bReserved){
-			if (!request_client){
-				Func_FastPMNTS(_T("Fatal Error:\n"));
-				Func_FastPMNSS(_T("%s (GetLastError():%ld)\n"),runtimeerr.Message,GetLastError());
-				Func_FastPMNSS(_T("Please contact the application's support team for more information.\n"));
+		}
+			catch(expection runtimeerr){
+			if (!bReserved){
+				if (!request_client){
+					Func_FastPMNTS(_T("Fatal Error:\n"));
+					Func_FastPMNSS(_T("%s (GetLastError():%ld)\n"),runtimeerr.Message,GetLastError());
+					Func_FastPMNSS(_T("Please contact the application's support team for more information.\n"));
+				}
+				else {
+					_stprintf(szline,szErrMeg,runtimeerr.Message,GetLastError());
+					___pipesentmessage(szline);
+				}
 			}
-			else {
-				_stprintf(szline,szErrMeg,runtimeerr.Message,GetLastError());
-				___pipesentmessage(szline);
+			else{
+				_tprintf(szErrMeg,runtimeerr.Message,GetLastError());
+				_tprintf(_T("\n[Debug Message]\n%s\n%s\n%s\n"),buf1,buf2,buf3);
+				abort();
 			}
 		}
-		else{
-			_tprintf(szErrMeg,runtimeerr.Message,GetLastError());
-			_tprintf(_T("\n[Debug Message]\n%s\n%s\n%s\n"),buf1,buf2,buf3);
-			abort();
-		}
-		Sleep(request_client?5000:(29*60000));
+		Sleep(bReserved?(request_client?5000:(29*60000)):0);
 	}
 	if (!bReserved) MessageBox(NULL,_T("Hosts File Set Success!"),
 					_T("Congratulations!"),MB_ICONINFORMATION|MB_SETFOREGROUND);
@@ -616,7 +616,7 @@ Cannot start service!\n"),GetLastError()),abort();
 	ss.dwCheckPoint=0;
 	ss.dwWaitHint=0;
 	SetServiceStatus(ssh,&ss);
-	if (!(lphdThread[0]=CreateThread(NULL,0,HostThread,NULL,0,NULL))){
+	if (!(lphdThread[0]=CreateThread(NULL,0,NormalEntry,NULL,0,NULL))){
 		Func_FastPMNTS(_T("CreateThread() Error with %ld \n\
 Cannot start main thread to update hosts!\n"),GetLastError());
 		ss.dwWin32ExitCode=ERROR_SERVICE_NO_THREAD;

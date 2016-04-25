@@ -74,7 +74,9 @@ If you want to enter debug mode, follow the steps blow.
 
 **Save `tool.exe.manifest` to directory first**
 
-Compile commandline:
+#### for Mingw g++
+
+Compile commandline:(or run `make.cmd`)
 
 ```
 windres tool.rc -o toolr.o
