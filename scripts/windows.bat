@@ -58,7 +58,7 @@ echo.
 echo iLocal=LCase("%DLPath%") > %DLScriptPath% ||(
  call :error downloadhosts.vbs 文件创建/写入失败.
 )
-echo iRemote=LCase("https://raw.githubusercontent.com/racaljk/hosts/master/hosts") >> %DLScriptPath%
+echo iRemote=LCase("https://coding.net/u/scaffrey/p/hosts/git/raw/master/hosts") >> %DLScriptPath%
 echo Set xPost=createObject("Microsoft.XMLHTTP") 'Set Post = CreateObject("Msxml2.XMLHTTP") >> %DLScriptPath%
 echo xPost.Open "GET",iRemote,0 >> %DLScriptPath%
 echo xPost.Send() >> %DLScriptPath%
