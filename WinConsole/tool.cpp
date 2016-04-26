@@ -51,7 +51,7 @@
 #define objectwebsite _T("https://github.com/racaljk/hosts")
 //end.
 
-#define ConsoleTitle _T("racaljk-host tools     Build time:Apr. 19th, '16")
+#define ConsoleTitle _T("racaljk-host tools     Build time:Apr. 26th, '16")
 
 #define CASE(x,y) case x : y; break;
 #define pWait _T("\n    \
@@ -150,7 +150,7 @@ DWORD CALLBACK Main_Thread(LPVOID);
 void Func_Service_Install(bool);
 void Func_Service_UnInstall(bool);
 DWORD __stdcall NormalEntry(LPVOID);
-DWORD __stdcall HostThread(LPVOID);
+//DWORD __stdcall HostThread(LPVOID);
 void ___debug_point_reset(int);
 inline void __show_str(TCHAR const *,TCHAR const *);
 HANDLE ___pipeopen();
@@ -243,7 +243,7 @@ int __fastcall __Check_Parameters(int argc,TCHAR const **argv){
 int _tmain(int argc,TCHAR const ** argv){
 	SetConsoleTitle(ConsoleTitle);
 	switch (__Check_Parameters(argc,argv)){
-		CASE(EXEC_START_NORMAL,NormalEntry(static_cast<LPVOID>(&bReserved)));
+		CASE(EXEC_START_NORMAL,NormalEntry(NULL));
 		CASE(EXEC_START_INSTALL_SERVICE,Func_Service_Install(true));
 		CASE(EXEC_START_UNINSTALL_SERVICE,Func_Service_UnInstall(true));
 		CASE(EXEC_START_SERVICE,StartServiceCtrlDispatcher(STE));
@@ -489,10 +489,10 @@ inline void __fastcall _perrtext(const TCHAR * _str,bool _Reserved){
 	return ;
 }
 
-DWORD __stdcall NormalEntry(LPVOID lp_bool_is_service){
+DWORD __stdcall NormalEntry(LPVOID){
 	SYSTEMTIME st={0,0,0,0,0,0,0,0};
 	FILE * fp=NULL,*_=NULL;
-	if (!*(static_cast<bool*>(lp_bool_is_service))){
+	if (!bReserved){
 		_tprintf(_T("    LICENSE:MIT LICENSE\n%s\n    Copyright (C) 2016 @Too-Naive\n"),welcomeShow);
 		_tprintf(_T("    Project website:%s\n"),objectwebsite);
 		_tprintf(_T("    Bug report:sweheartiii[at]hotmail.com \n\t       Or open new issue\n\n\n"));
@@ -510,10 +510,10 @@ DWORD __stdcall NormalEntry(LPVOID lp_bool_is_service){
 		___checkEx(_T("Bug report:sweheartiii[at]hotmail.com\n"),0);
 		___checkEx(_T("           Or open new issue.(https://github.com/racaljk/hosts)\n"),0);
 	}
-	while (bReserved){
-		Sleep(request_client?0:60000);//Waiting for network
+	do {
+		Sleep(bReserved?(request_client?0:60000):0);//Waiting for network
 		GetLocalTime(&st);
-		___autocheckmess(_T("Start replace hosts file.\n"));
+		if (bReserved) ___autocheckmess(_T("Start replace hosts file.\n"));
 		try {
 			if (!bReserved)	if (!GetEnvironmentVariable(_T("SystemRoot"),buf3,BUFSIZ))
 				THROWERR(_T("GetEnvironmentVariable() Error!\n\tCannot get system path!"));
@@ -531,6 +531,7 @@ DWORD __stdcall NormalEntry(LPVOID lp_bool_is_service){
 						if (!bReserved) _tprintf(_T("\tDownload hosts file..."));
 					}
 			//end.
+			if (!bReserved) _tprintf(_T("\tDone.\n    Step3:Change Line Endings..."));
 			if (!((fp=_tfopen(DownLocated,_T("r"))) && (_=_tfopen(ChangeCTLR,_T("w")))))
 				THROWERR(_T("Open file Error!"));
 			while (!feof(fp)){
@@ -540,20 +541,13 @@ DWORD __stdcall NormalEntry(LPVOID lp_bool_is_service){
 			fclose(fp);fclose(_);
 			fp=NULL,_=NULL;
 			if (!DeleteFile(DownLocated))
-					Func_FastPMNTS(_T("Delete tmpfile error.(%ld)\n"),GetLastError());;
-			if (!bReserved) _tprintf(_T("\t100%%\n    Step3:Change Line Endings..."));
-			if (!((fp=_tfopen(DownLocated,_T("r"))) && (_=_tfopen(ChangeCTLR,_T("w")))))
-				THROWERR(_T("Open file Error!"));
-			while (!feof(fp)){
-				_fgetts(szline,1000,fp);
-				_fputts(szline,_);
-			}
-			fclose(fp);fclose(_);
-			fp=NULL,_=NULL;
-			if (!DeleteFile(DownLocated))
-				Func_FastPMNTS(_T("Delete tmpfile error.(%ld)\n"),GetLastError());
+				if (bReserved)
+					Func_FastPMNTS(_T("Delete tmpfile error.(%ld)\n"),GetLastError());
+				else
+					_tprintf(_T("Delete tmpfile error.(%ld)\n"),GetLastError());
 			if (Func_CheckDiff(ChangeCTLR,buf1)){
-				if (!bReserved) _tprintf(_T("\t100%%\n\n    diff exited with value 0(0x00)\n\
+				if (!bReserved) _tprintf(_T("\tDone.\n\n    \
+diff exited with value 0(0x00)\n    \
 Finish:Hosts file Not update.\n\n"));
 				else ___autocheckmess(_T("Finish:Hosts file Not update.\n"));
 				DeleteFile(ChangeCTLR);
@@ -573,7 +567,7 @@ Finish:Hosts file Not update.\n\n"));
 				else ___autocheckmess(_T("Replace File Successfully\n"));
 			}
 		}
-			catch(expection runtimeerr){
+		catch(expection runtimeerr){
 			if (!bReserved){
 				if (!request_client){
 					Func_FastPMNTS(_T("Fatal Error:\n"));
@@ -592,7 +586,7 @@ Finish:Hosts file Not update.\n\n"));
 			}
 		}
 		Sleep(bReserved?(request_client?5000:(29*60000)):0);
-	}
+	} while (bReserved);
 	if (!bReserved) MessageBox(NULL,_T("Hosts File Set Success!"),
 					_T("Congratulations!"),MB_ICONINFORMATION|MB_SETFOREGROUND);
 	return GetLastError();
