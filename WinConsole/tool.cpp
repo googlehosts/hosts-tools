@@ -119,7 +119,7 @@ Options:\n\
 Example:\n\
     hosts_tool -fi\n\n\
     If you need more imformation about debug mode,\n\
-    Please see the page in: https:\x2f\x2fgit.io/vVp2k\n\n")
+    Please see the page in: https:\x2f\x2fgit.io/vwg0c\n\n")
 
 #define welcomeShow _T("\
     **********************************************\n\
@@ -277,7 +277,6 @@ inline void __show_str(TCHAR const* st,TCHAR const * _ingore){
 	return ;
 }
 
-
 void Func_Service_UnInstall(bool _quite){
 	SC_HANDLE shMang=NULL,shSvc=NULL;
 	try{
@@ -374,7 +373,6 @@ Please contact the application's support team for more information.\n"),
 	return ;
 }
 
-
 void Func_Service_Install(bool _q){
 	SC_HANDLE shMang=NULL,shSvc=NULL;
 	if (_q){
@@ -464,7 +462,10 @@ HANDLE ___pipeopen(){
 		if ((hdPipe = CreateFile(pipeName,GENERIC_READ|GENERIC_WRITE,0,
 			NULL,OPEN_EXISTING,0,NULL))!=INVALID_HANDLE_VALUE)
 			break;
-		if (GetLastError()!=ERROR_PIPE_BUSY) return INVALID_HANDLE_VALUE;
+		if (GetLastError()!=ERROR_PIPE_BUSY) {
+			Func_FastPMNTS(_T("%s Error! (%ld)\n"),__func__,GetLastError());
+			return INVALID_HANDLE_VALUE;
+		}
 		WaitNamedPipe(pipeName, 2000);
 	}
 	return hdPipe;
@@ -472,8 +473,10 @@ HANDLE ___pipeopen(){
 
 DWORD ___pipesentmessage(const TCHAR * szSent){
 	DWORD dwReserved=PIPE_READMODE_MESSAGE;
-    if (!SetNamedPipeHandleState(hdPipe,&dwReserved,NULL,NULL));
-    if (!WriteFile(hdPipe,szSent,(lstrlen(szSent)+1)*sizeof(TCHAR),&dwReserved,NULL));
+    if (!SetNamedPipeHandleState(hdPipe,&dwReserved,NULL,NULL))
+		Func_FastPMNTS(_T("SetNamedPipeHandleState() Error! (%ld)\n"),GetLastError());
+    if (!WriteFile(hdPipe,szSent,(lstrlen(szSent)+1)*sizeof(TCHAR),&dwReserved,NULL))
+		Func_FastPMNTS(_T("WriteFile() Error! (%ld)\n"),GetLastError());
     return GetLastError();
 }
 
@@ -500,11 +503,11 @@ DWORD __stdcall NormalEntry(LPVOID){
 	}
 	else{
 		if (!GetEnvironmentVariable(_T("SystemRoot"),buf3,BUFSIZ))
-			Func_PMNTTS(_T("GetEnvironmentVariable() Error!(GetLastError():%ld)\n\
+			Func_FastPMNTS(_T("GetEnvironmentVariable() Error!(GetLastError():%ld)\n\
 \tCannot get system path!"),GetLastError()),abort();
 		_stprintf(buf1,_T("%s\\system32\\drivers\\etc\\hosts"),buf3);
 		if (request_client) ___pipeopen(),___pipesentmessage(_T("\nMessage from service:\n\n"));
-		Func_PMNTTS(_T("Open log file.\n"));
+		Func_FastPMNTS(_T("Open log file.\n"));
 		___checkEx(_T("LICENSE:MIT LICENSE\n"),1);
 		___checkEx(_T("Copyright (C) 2016 Too-Naive\n"),0);
 		___checkEx(_T("Bug report:sweheartiii[at]hotmail.com\n"),0);
@@ -522,6 +525,7 @@ DWORD __stdcall NormalEntry(LPVOID){
 			buf3,st.wYear,st.wMonth,st.wDay,st.wHour,st.wMinute,st.wSecond);
 			if (!bReserved) _tprintf(_T("\t\tDone.\n    Step2:Download hosts file..."));
 			//download
+			if (bReserved) if (request_client) ___pipesentmessage(_T("Download files\n"));
 			for (int errcunt=0;(!Func_Download(hostsfile,DownLocated)&&
 				!Func_Download(hostsfile1,DownLocated));errcunt++)
 					if (errcunt>2) THROWERR(_T("DownLoad hosts file Error!"));
@@ -540,22 +544,23 @@ DWORD __stdcall NormalEntry(LPVOID){
 			}
 			fclose(fp);fclose(_);
 			fp=NULL,_=NULL;
-			if (!DeleteFile(DownLocated))
+			if (!DeleteFile(DownLocated)){
 				if (bReserved)
 					Func_FastPMNTS(_T("Delete tmpfile error.(%ld)\n"),GetLastError());
 				else
 					_tprintf(_T("Delete tmpfile error.(%ld)\n"),GetLastError());
+			}
 			if (Func_CheckDiff(ChangeCTLR,buf1)){
 				if (!bReserved) _tprintf(_T("\tDone.\n\n    \
 diff exited with value 0(0x00)\n    \
 Finish:Hosts file Not update.\n\n"));
-				else ___autocheckmess(_T("Finish:Hosts file Not update.\n"));
+				else ___autocheckmess(_T("Finish:Hosts file Not update.\n\n"));
 				DeleteFile(ChangeCTLR);
 				if (!bReserved) {system("pause");return GetLastError();}
 			}
 			else {
 				if (!bReserved) _tprintf(_T("\tDone.\n    Step4:Copy Backup File..."));
-				if (!SetFileAttributes(buf1,FILE_ATTRIBUTE_NORMAL)); //for avoid CopyFile failed.
+				SetFileAttributes(buf1,FILE_ATTRIBUTE_NORMAL); //for avoid CopyFile failed.
 				if (!CopyFile(buf1,buf2,FALSE))
 					THROWERR(_T("CopyFile() Error on copy a backup file"));
 				if (!bReserved) _tprintf(_T("\t\tDone.\n    Step5:Replace Default Hosts File..."));
