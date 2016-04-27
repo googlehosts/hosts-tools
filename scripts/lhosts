@@ -20,15 +20,29 @@ usage() {
   可使用 crontab 定时执行脚本 (请确保 sudo 无需输入密码)
 
 用法: $thisname [选项]...
-从 $site 获取更新的 hosts 文件
+默认从 $site 获取 hosts 文件 (更新文件内 localhost 为 `hostname`)
+替换到 $HOSTS 中
 
 选项:
   -c, --curl             使用 curl 下载
-  -m, --mirror           使用镜像下载
+  -m, --mirror           使用镜像地址
   -q, --quiet            静默下载
-  -h, --help             显示帮助信息并退出
+  -u, --url              自定义 hosts 源地址
+  -h, -1, --help         显示帮助信息并退出
 
-示例: $thisname -cmq
+退出状态：
+  0  正常
+  1  一般问题 (例如：命令行参数错误)
+  2  严重问题 (例如：文件下载失败)
+
+参考:
+
+    $thisname -cmq
+
+自定义源：
+
+    $thisname -cqu $MIRROR
+
 EOL
 }
 
@@ -39,10 +53,15 @@ hosts_get() {
         # use curl
         "$NET_TOOL" $QCURL "$HOSTS_URL" -o "$REMOTE"
     fi
+
+    if [ "$?" -ne 0 ]; then
+        echo -e "\nhosts 下载失败" >&2
+        exit 2
+    fi
 }
 
 hosts_update() {
-    local local="$1"
+    local old="$1"
     local rmt="$2"
     local tmp="hosts.swp"
     local begin="# Copyright (c) 2014"
@@ -52,15 +71,15 @@ hosts_update() {
     rm -f "$rmt"
 
     # check if racaljk hosts, or do nothing
-    if cat "$local" | grep -q racaljk; then
-        sed -e "/$begin/,/$end/d" "$local" >> "$tmp"
+    if cat "$old" | grep -q racaljk; then
+        sed -e "/$begin/,/$end/d" "$old" >> "$tmp"
     fi
 
-    sudo mv "$tmp" "$local"
+    sudo mv "$tmp" "$old"
 }
 
-CMD=`getopt -o cmqh1 --long curl,mirror,quiet,help -n "$thisname" -- "$@"` || \
-    exit 1
+CMD=`getopt -o cmqu:h1 --long curl,mirror,quiet,url:help -n \
+    "$thisname" -- "$@"` || exit 1
 
 eval set -- "$CMD"
 
@@ -78,6 +97,10 @@ while true; do
             QWGET=-q
             QCURL=-s
             shift
+            ;;
+        -u|--url)
+            HOSTS_URL="$2"
+            shift 2
             ;;
         -h|-1|--help)
             usage
