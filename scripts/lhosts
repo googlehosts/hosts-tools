@@ -4,7 +4,7 @@ site=https://github.com/racaljk/hosts
 thisname=${0##*/}
 
 HOSTS=/etc/hosts
-REMOTE="hosts.rmt"
+REMOTE="/tmp/hosts.rmt"
 
 MAIN="https://raw.githubusercontent.com/racaljk/hosts/master/hosts"
 MIRROR="https://coding.net/u/scaffrey/p/hosts/git/raw/master/hosts"
@@ -63,7 +63,7 @@ hosts_get() {
 hosts_update() {
     local old="$1"
     local rmt="$2"
-    local tmp="hosts.swp"
+    local tmp="/tmp/hosts.swp"
     local begin="# Copyright (c) 2014"
     local end="# Modified hosts end"
 
@@ -71,7 +71,7 @@ hosts_update() {
     rm -f "$rmt"
 
     # check if racaljk hosts, or do nothing
-    if cat "$old" | grep -q racaljk; then
+    if grep -q racaljk "$old"; then
         sed -e "/$begin/,/$end/d" "$old" >> "$tmp"
     fi
 
