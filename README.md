@@ -24,8 +24,7 @@ Mac OS | hosts Tool 应用
          * *nix 环境下的 hosts 一键部署脚本。
 
      - [**lhosts**](http://keving.pythonanywhere.com/hosts_scripts/lhosts):
-         * 作为 **linux.sh** 增强版，**lhosts** 可用于所有标准/类 Unix 系统，
-           使用命令行选项提供各种功能，更便于作为定时任务执行。
+         * linux.sh 后继版，使用命令行选项更新 hosts，更便于作为定时任务执行。
 
  - **跨平台**：
      - **Hozz** (Javascripts):
