@@ -32,15 +32,15 @@
 #include <windows.h>
 #include <stdio.h>
 #include <string.h>
-#include "download.hpp"
+#include "hander/download.hpp"
 #include <tchar.h>
 #include <stdlib.h>
-#include "ptrerr.hpp"
-#include "diff.hpp"
-#include "mitlicense.hpp"
+#include "hander/ptrerr.hpp"
+#include "hander/diff.hpp"
+#include "hander/mitlicense.hpp"
 #include <signal.h>
-#include "pipedebug.hpp"
-#include "default.hpp"
+#include "hander/pipedebug.hpp"
+#include "hander/default.hpp"
 
 #define WIN32_LEAN_AND_MEAN
 
