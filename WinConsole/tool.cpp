@@ -141,15 +141,12 @@ bool request_client,bReserved;
 int __fastcall __Check_Parameters(int,TCHAR const**);
 void WINAPI Service_Main(DWORD, LPTSTR *);
 void WINAPI Service_Control(DWORD);
-DWORD CALLBACK Main_Thread(LPVOID);
 void Func_Service_Install(bool);
 void Func_Service_UnInstall(bool);
 DWORD __stdcall NormalEntry(LPVOID);
-//DWORD __stdcall HostThread(LPVOID);
 void ___debug_point_reset(int);
 inline void __show_str(TCHAR const *,TCHAR const *);
 void Func_ResetFile();
-int FASTCALL Func_CopyFile(FILE *,FILE *);
 
 
 SERVICE_TABLE_ENTRY STE[2]={{Sname,Service_Main},{NULL,NULL}};
@@ -544,9 +541,10 @@ DWORD __stdcall NormalEntry(LPVOID){
 			while (!feof(fp)){
 				memset(szline,0,sizeof(szline));
 				_fgetts(szline,1000,fp);
-				if (*szline==_T('#')) 
+				if (*szline==_T('#')) {
 					if (_tcsstr(szline,_T("# Copyright (c) 2014")))
 					break; else continue;
+				}
 				if (*szline==_T('\n')) continue;
 				_fputts(szline,_);
 			}
@@ -678,13 +676,4 @@ void WINAPI Service_Control(DWORD dwControl){
 		default:break;
 	}
 	return ;
-}
-
-
-char _buf[2048];
-int FASTCALL Func_CopyFile(FILE *from,FILE *to){
-	size_t readByte=0;
-	while ((readByte=fread((void*)_buf,sizeof(char),2048,from)))
-		fwrite(_buf,sizeof(char),readByte,to);
-	return 0;
 }
