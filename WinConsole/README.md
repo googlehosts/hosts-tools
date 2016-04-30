@@ -3,8 +3,8 @@
 Last update: Apr. 29th , 2016
 
 #### 下载地址:
- -- [点我来下载](https://git.io/vwsqL)
- -- [如果上面那个不行的话点我](https://yunpan.cn/cPseSVaAVwMBL)(code:5c40)
+- [点我来下载](https://git.io/vwsqL)
+- [如果上面那个不行的话点我](https://yunpan.cn/cPseSVaAVwMBL)(code:5c40)
 
 OS type | Minimun Supported Version
 --------|-------------------
