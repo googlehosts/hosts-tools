@@ -10,7 +10,7 @@ MAIN="https://raw.githubusercontent.com/racaljk/hosts/master/hosts"
 MIRROR="https://coding.net/u/scaffrey/p/hosts/git/raw/master/hosts"
 HOSTS_URL="$MAIN"
 
-NET_TOOL="wget"
+NET_TOOL="curl"
 QWGET=
 QCURL=
 
@@ -24,8 +24,8 @@ usage() {
 替换到 $HOSTS 中
 
 选项:
-  -c, --curl             使用 curl 下载
-  -m, --mirror           使用镜像地址
+  -w, --wget             使用 wget 下载
+  -m, --mirror           使用镜像地址下载
   -q, --quiet            静默下载
   -u, --url              自定义 hosts 源地址
   -h, -1, --help         显示帮助信息并退出
@@ -37,11 +37,11 @@ usage() {
 
 参考:
 
-    $thisname -cmq
+    $thisname -mq
 
 自定义源：
 
-    $thisname -cqu $MIRROR
+    $thisname -qu $MIRROR
 
 EOL
 }
@@ -51,7 +51,8 @@ hosts_get() {
         "$NET_TOOL" $QWGET "$HOSTS_URL" -O "$REMOTE"
     else
         # use curl
-        "$NET_TOOL" $QCURL "$HOSTS_URL" -o "$REMOTE"
+	echo "正在更新 hosts ..."
+        "$NET_TOOL" -# $QCURL "$HOSTS_URL" -o "$REMOTE"
     fi
 
     if [ "$?" -ne 0 ]; then
@@ -78,15 +79,15 @@ hosts_update() {
     sudo mv "$tmp" "$old"
 }
 
-CMD=`getopt -o cmqu:h1 --long curl,mirror,quiet,url:help -n \
+CMD=`getopt -o wmqu:h1 --long wget,mirror,quiet,url:help -n \
     "$thisname" -- "$@"` || exit 1
 
 eval set -- "$CMD"
 
 while true; do
     case "$1" in
-        -c|--curl)
-            NET_TOOL=curl
+        -w|--wget)
+            NET_TOOL="wget"
             shift
             ;;
         -m|--mirror)
