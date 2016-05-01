@@ -26,6 +26,6 @@ Mac OS | hosts Tool 应用
 
 ### 跨平台工具
 - **Hozz**
-1. 跨平台的 hosts 更新工具，Javascripts 编写。维护者 [@ppoffice](https://github.com/ppoffice)
-2. **Hozz** [首页](http://ppoffice.github.io/Hozz)
-3. **Hozz** on [Github](https://github.com/ppoffice/Hozz)
+  - 跨平台的 hosts 更新工具，Javascripts 编写。维护者 [@ppoffice](https://github.com/ppoffice)
+  - **Hozz** [首页](http://ppoffice.github.io/Hozz)
+  - **Hozz** on [Github](https://github.com/ppoffice/Hozz)
