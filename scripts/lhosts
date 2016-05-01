@@ -26,7 +26,7 @@ usage() {
 选项:
   -w, --wget             使用 wget 下载
   -m, --mirror           使用镜像地址下载
-  -q, --quiet            静默下载
+  -q, --quiet            静默模式
   -u, --url              自定义 hosts 源地址
   -h, -1, --help         显示帮助信息并退出
 
@@ -51,7 +51,9 @@ hosts_get() {
         "$NET_TOOL" $QWGET "$HOSTS_URL" -O "$REMOTE"
     else
         # use curl
+    if [ "$QCURL" = "" ]; then
 	echo "正在更新 hosts ..."
+    fi
         "$NET_TOOL" -# $QCURL "$HOSTS_URL" -o "$REMOTE"
     fi
 
