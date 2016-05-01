@@ -21,7 +21,7 @@ usage() {
 
 用法: $thisname [选项]...
 默认从 $site 获取 hosts 文件 (更新文件内 localhost 为 `hostname`)
-替换到 $HOSTS 中
+替换到 $HOSTS 中，备份更新前的 hosts 至 /etc/hosts.bak
 
 选项:
   -w, --wget             使用 wget 下载
