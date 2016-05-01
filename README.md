@@ -21,7 +21,7 @@ Mac OS | hosts Tool 应用
 - [**windows.bat**](http://keving.pythonanywhere.com/hosts_scripts/windows.bat):
   - Windows 环境下的 hosts 一键部署脚本，双击 `windows.bat` 即可更新。
 
-- *[**lhosts**](http://keving.pythonanywhere.com/hosts_scripts/lhosts)
+- [**lhosts**](http://keving.pythonanywhere.com/hosts_scripts/lhosts)
   - *nix 平台自动部署脚本，使用 `./lhosts -h` 命令获取帮助信息。
 
 ### 跨平台工具
