@@ -21,11 +21,11 @@ usage() {
 
 用法: $thisname [选项]...
 默认从 $site 获取 hosts 文件 (更新文件内 localhost 为 `hostname`)
-替换到 $HOSTS 中，备份更新前的 hosts 至 /etc/hosts.bak
+替换到 $HOSTS 中。更新前备份原 hosts 至 /etc/hosts.bak
 
 选项:
   -w, --wget             使用 wget 下载
-  -m, --mirror           使用镜像地址下载
+  -m, --mirror           使用 hosts 镜像地址
   -q, --quiet            静默模式
   -u, --url              自定义 hosts 源地址
   -h, -1, --help         显示帮助信息并退出
@@ -52,7 +52,7 @@ hosts_get() {
     else
         # use curl
     if [ "$QCURL" = "" ]; then
-	echo "正在更新 hosts ..."
+        echo "正在更新 hosts ..."
     fi
         "$NET_TOOL" -# $QCURL "$HOSTS_URL" -o "$REMOTE"
     fi
