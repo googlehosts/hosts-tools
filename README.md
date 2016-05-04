@@ -1,4 +1,4 @@
-**除Script外，其他所有项目均已迁移至  @HostsTools**
+**除Script外，其他所有项目均已迁移至  [@HostsTools](https://github.com/HostsTools)**
 
 平台 | 类型
 --------|---------
