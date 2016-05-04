@@ -1,19 +1,25 @@
+**除Script外，其他所有项目均已迁移至  @HostsTools**
+
 平台 | 类型
 --------|---------
 Microsoft Windows | 批处理, 终端工具, HostsTool 应用（可跨平台）
 Mac OS | hosts Tool 应用
+Android | Android应用
 *nix | 脚本
 跨平台 | [**Hozz**](http://ppoffice.github.io/Hozz) 应用 (外部项目)
 
 ## 简介
-### QtGUI
-- Windows 平台 QT GUI 应用（可跨平台，C++ 编写）
+### cross-platform-Qt
+- QT GUI 应用（可跨平台，C++ 编写）
 
-### WinConsole
+### Windows
 - Windows 平台的终端工具（C++编写）
 
-### MacOS
+### OSX
 - Mac 环境下的 hosts 自动部署应用 (适用于 OS X 10.10 或以上, Swift 编写)
+
+### Android
+- Android下的hosts更新应用(java编写，需root)
 
 ### 脚本
 - [**windows.bat**](http://keving.pythonanywhere.com/hosts_scripts/windows.bat)
