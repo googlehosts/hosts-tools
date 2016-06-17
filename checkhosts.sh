@@ -39,7 +39,7 @@ chk_format() {
 
     if [ "$?" -ne 0 ]; then
         echo -e "\nhosts format mismatch! The following rules should be normalized:"
-        diff -ruN 1.txt 2.txt
+        diff 1.txt 2.txt
         FORMAT_BREAK=1
     else
         echo -e "All fine!"
@@ -83,10 +83,7 @@ echo -e "line endings break?      $LINE_BREAK (1 = yes, 0 = no)"
 if [ -n $STRICT_HOSTS_FORMAT ]; then
     echo -e "hosts format mismatch?   $FORMAT_BREAK (1 = yes, 0 = no)"
     echo -e "hosts date mismatch?     $DATE_BREAK (1 = yes, 0 = no)"
-fi
 
-if [ -n $STRICT_HOSTS_FORMAT ]; then
-    # cout number of breaks
     ret=$(echo -e "$LINE_BREAK $FORMAT_BREAK $DATE_BREAK" | grep -o "1" | wc -w)
     exit $ret
 else
