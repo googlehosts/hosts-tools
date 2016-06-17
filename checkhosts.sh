@@ -68,7 +68,7 @@ chk_date() {
 
 chk_line
 
-if [ -n $STRICT_HOSTS_FORMAT ]; then
+if [ -n "$STRICT_HOSTS_FORMAT" ]; then
     chk_format
     chk_date
 fi
@@ -80,7 +80,7 @@ echo -e "4. Result:\n"
 
 echo -e "line endings break?      $LINE_BREAK (1 = yes, 0 = no)"
 
-if [ -n $STRICT_HOSTS_FORMAT ]; then
+if [ -n "$STRICT_HOSTS_FORMAT" ]; then
     echo -e "hosts format mismatch?   $FORMAT_BREAK (1 = yes, 0 = no)"
     echo -e "hosts date mismatch?     $DATE_BREAK (1 = yes, 0 = no)"
 
