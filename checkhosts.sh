@@ -58,7 +58,8 @@ chk_format() {
 # 3. check "Last updated", only used if STRICT_HOSTS_FORMAT already set
 #
 chk_date() {
-    local real_date=$(find "$1" -printf "%CY-%Cm-%Cd")
+    local real_date=$(git log --date=short "$1" | \
+                        grep -o "[0-9]\+-[0-9]\+-[0-9]\+" -m 1)
     local in_hosts=$(grep -o "[[:digit:]]\+-[[:digit:]]\+-[[:digit:]]\+" "$1")
 
     echo -e "3. check hosts date:\n"
