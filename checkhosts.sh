@@ -5,21 +5,25 @@ LINE_BREAK=0
 FORMAT_BREAK=0
 DATE_BREAK=0
 
+#
+# debug only
+#
 # set -xv
 
 #
 # 1. check line endings
 #
 chk_line() {
-    local le_ret=$(dos2unix -id hosts | grep -o "[0-9]\+")
+    local ret=$(dos2unix -id "$1" | grep -o "[0-9]\+")
 
     echo -e "1. check line endings:\n"
 
-    if [ "$le_ret" -ne 0 ]; then
-        echo -e "DOS line endings $le_ret times appeared, it must be coverted!\n\n"
+    if [ "$ret" -ne 0 ]; then
+        echo -e "\033[41mDOS line endings $ret times appeared, " \
+                    "it must be coverted!\033[0m\n\n"
         LINE_BREAK=1
     else
-        echo -e "All fine!\n\n"
+        echo -e "\033[42mAll fine!\033[0m\n\n"
     fi
 }
 
@@ -27,24 +31,26 @@ chk_line() {
 # 2. hosts format check, only used if STRICT_HOSTS_FORMAT already set
 #
 chk_format() {
+    local bad="[0-9]\+.[0-9]\+.[0-9]\+.[0-9]\+[[:blank:]]\+"
+    local fmt="[0-9]\+.[0-9]\+.[0-9]\+.[0-9]\+$(echo -e "\t")[[:alnum:]]\+"
+
     echo -e "2. check hosts format:\n"
 
-    grep "[[:digit:]]\+.[[:digit:]]\+.[[:digit:]]\+.[[:digit:]]\+[[:blank:]]\+" \
-        hosts > 1.txt
-
-    grep "[[:digit:]]\+.[[:digit:]]\+.[[:digit:]]\+.[[:digit:]]\+$(echo -e "\t")[[:alnum:]]\+" \
-        hosts > 2.txt
+    grep "$bad" "$1" > 1.txt
+    grep "$fmt" "$1" > 2.txt
 
     diff -q 1.txt 2.txt
 
     if [ "$?" -ne 0 ]; then
-        echo -e "\nhosts format mismatch! The following rules should be normalized:"
+        echo -e "\n\033[41mhosts format mismatch! " \
+                    "The following rules should be normalized:\033[0m"
         diff 1.txt 2.txt
         FORMAT_BREAK=1
     else
-        echo -e "All fine!"
+        echo -e "\033[42mAll fine!\033[0m"
     fi
 
+    echo -e "\n\n"
     rm -f 1.txt 2.txt
 }
 
@@ -52,40 +58,50 @@ chk_format() {
 # 3. check "Last updated", only used if STRICT_HOSTS_FORMAT already set
 #
 chk_date() {
-    local real_date=$(find hosts -printf "%CY-%Cm-%Cd")
-    local in_hosts=$(grep -o "[[:digit:]]\+-[[:digit:]]\+-[[:digit:]]\+" hosts)
+    local real_date=$(find "$1" -printf "%CY-%Cm-%Cd")
+    local in_hosts=$(grep -o "[[:digit:]]\+-[[:digit:]]\+-[[:digit:]]\+" "$1")
 
-    echo -e "\n\n3. check hosts date:\n"
+    echo -e "3. check hosts date:\n"
 
     if [ "$real_date" != "$in_hosts" ]; then
-        echo -e "hosts date mismatch, last modified is $real_date, " \
-                  "but hosts tells $in_hosts\n\n"
+        echo -e "\033[41mhosts date mismatch, last modified is $real_date, " \
+            "but hosts tells $in_hosts\033[0m\n\n"
         DATE_BREAK=1
     else
-        echo -e "All fine!\n\n"
+        echo -e "\033[42mAll fine!\033[0m\n\n"
     fi
 }
-
-chk_line
-
-if [ -n "$STRICT_HOSTS_FORMAT" ]; then
-    chk_format
-    chk_date
-fi
 
 #
 # Result
 #
-echo -e "4. Result:\n"
+result () {
+    echo -e "Result:\n"
 
-echo -e "line endings break?      $LINE_BREAK (1 = yes, 0 = no)"
+    echo -e "line endings break?      $LINE_BREAK (1 = yes, 0 = no)"
+
+    if [ -n "$STRICT_HOSTS_FORMAT" ]; then
+        echo -e "hosts format mismatch?   $FORMAT_BREAK (1 = yes, 0 = no)"
+        echo -e "hosts date mismatch?     $DATE_BREAK (1 = yes, 0 = no)"
+
+        local ret=$(echo -e "$LINE_BREAK $FORMAT_BREAK $DATE_BREAK" \
+            | grep -o "1" | wc -w)
+        exit $ret
+    else
+        exit $LINE_BREAK
+    fi
+}
+
+if [ "$1" = "" ]; then
+    echo -e "\033[41mError, requires an argument!\033[0m"
+    exit -1
+fi
+
+chk_line "$1"
 
 if [ -n "$STRICT_HOSTS_FORMAT" ]; then
-    echo -e "hosts format mismatch?   $FORMAT_BREAK (1 = yes, 0 = no)"
-    echo -e "hosts date mismatch?     $DATE_BREAK (1 = yes, 0 = no)"
-
-    ret=$(echo -e "$LINE_BREAK $FORMAT_BREAK $DATE_BREAK" | grep -o "1" | wc -w)
-    exit $ret
-else
-    exit $LINE_BREAK
+    chk_format "$1"
+    chk_date "$1"
 fi
+
+result
