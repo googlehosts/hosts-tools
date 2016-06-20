@@ -6,11 +6,6 @@ FORMAT_BREAK=0
 DATE_BREAK=0
 
 #
-# debug only
-#
-# set -xv
-
-#
 # 1. check line endings
 #
 chk_line() {
@@ -23,7 +18,7 @@ chk_line() {
                     "it must be coverted!\033[0m\n\n"
         LINE_BREAK=1
     else
-        echo -e "\033[42mAll fine!\033[0m\n\n"
+        echo -e "\033[42mAll is well!\033[0m\n\n"
     fi
 }
 
@@ -31,13 +26,13 @@ chk_line() {
 # 2. hosts format check, only used if STRICT_HOSTS_FORMAT already set
 #
 chk_format() {
-    local bad="[0-9]\+.[0-9]\+.[0-9]\+.[0-9]\+[[:blank:]]\+"
-    local fmt="[0-9]\+.[0-9]\+.[0-9]\+.[0-9]\+$(echo -e "\t")[[:alnum:]]\+"
+    local loc="[0-9]\+.[0-9]\+.[0-9]\+.[0-9]\+[[:blank:]]\+"
+    local in_fmt="[0-9]\+.[0-9]\+.[0-9]\+.[0-9]\+$(echo -e "\t")[[:alnum:]]\+"
 
     echo -e "2. check hosts format:\n"
 
-    grep "$bad" "$1" > 1.txt
-    grep "$fmt" "$1" > 2.txt
+    grep "$loc" "$1" > 1.txt
+    grep "$in_fmt" "$1" > 2.txt
 
     diff -q 1.txt 2.txt
 
@@ -47,10 +42,10 @@ chk_format() {
         diff 1.txt 2.txt
         FORMAT_BREAK=1
     else
-        echo -e "\033[42mAll fine!\033[0m"
+        echo -e "\033[42mAll is well!\033[0m"
     fi
 
-    echo -e "\n\n"
+    echo -e "\n"
     rm -f 1.txt 2.txt
 }
 
@@ -60,7 +55,7 @@ chk_format() {
 chk_date() {
     local real_date=$(git log --date=short "$1" | \
                         grep -o "[0-9]\+-[0-9]\+-[0-9]\+" -m 1)
-    local in_hosts=$(grep -o "[[:digit:]]\+-[[:digit:]]\+-[[:digit:]]\+" "$1")
+    local in_hosts=$(grep -o "[0-9]\+-[0-9]\+-[0-9]\+" "$1")
 
     echo -e "3. check hosts date:\n"
 
@@ -69,7 +64,7 @@ chk_date() {
             "but hosts tells $in_hosts\033[0m\n\n"
         DATE_BREAK=1
     else
-        echo -e "\033[42mAll fine!\033[0m\n\n"
+        echo -e "\033[42mAll is well!\033[0m\n\n"
     fi
 }
 
