@@ -5,7 +5,7 @@
 Microsoft Windows | 批处理, 终端工具, HostsTool 应用（可跨平台）
 Mac OS | hosts Tool 应用
 Android | Android应用
-*nix | 脚本
+Linux | 脚本
 跨平台 | Haskell-终端应用,[**Hozz**](http://ppoffice.github.io/Hozz) 应用 (外部项目)
 
 ## 简介
@@ -31,8 +31,11 @@ Android | Android应用
   - 如有异常，请确认脚本是否为 UTF-8 编码
 
 - [**lhosts**](http://keving.pythonanywhere.com/hosts_scripts/lhosts)
-  - *nix 平台自动部署脚本，使用 `./lhosts -h` 命令获取帮助信息。
-  - 点击链接下载时，请为脚本添加可执行权限，执行 `chmod a+x lhosts`
+  - Linux 平台自动部署脚本，使用 `./lhosts -h` 命令获取帮助信息。
+  - 点击链接下载时，请为脚本添加可执行权限，执行 `chmod u+x lhosts`
+
+- [**Hindent**](Hindent)
+  - Linux 平台下用于格式化 hosts 文件的脚本，用法: `./Hindent [hosts]`
 
 ### 跨平台工具
 - **Hozz**
