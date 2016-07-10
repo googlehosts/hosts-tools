@@ -5,7 +5,6 @@ LINE_BREAK=0
 FORMAT_BREAK=0
 DATE_BREAK=0
 
-#
 # 1. check line endings
 #
 chk_line() {
@@ -22,12 +21,11 @@ chk_line() {
     fi
 }
 
-#
-# 2. hosts format check, only used if STRICT_HOSTS_FORMAT already set
+# 2. check hosts format, only used if STRICT_HOSTS_FORMAT already set
 #
 chk_format() {
-    local loc="[0-9]\+.[0-9]\+.[0-9]\+.[0-9]\+[[:blank:]]\+"
-    local in_fmt="[0-9]\+.[0-9]\+.[0-9]\+.[0-9]\+$(echo -e "\t")[[:alnum:]]\+"
+    local loc="[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+"
+    local in_fmt="[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$(echo -e "\t")[[:alnum:]]\+"
 
     echo -e "2. check hosts format:\n"
 
@@ -49,7 +47,6 @@ chk_format() {
     rm -f 1.txt 2.txt
 }
 
-#
 # 3. check "Last updated", only used if STRICT_HOSTS_FORMAT already set
 #
 chk_date() {
@@ -61,7 +58,7 @@ chk_date() {
 
     if [ "$real_date" != "$in_hosts" ]; then
         echo -e "\033[41mhosts date mismatch, last modified is $real_date, " \
-            "but hosts tells $in_hosts\033[0m\n\n"
+                "but hosts tells $in_hosts\033[0m\n\n"
         DATE_BREAK=1
     else
         echo -e "\033[42mAll is well!\033[0m\n\n"
