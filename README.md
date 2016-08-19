@@ -2,7 +2,7 @@
 
 平台 | 类型
 --------|---------
-Microsoft Windows | 批处理, 终端工具, HostsTool 应用（可跨平台）
+Microsoft Windows |  终端工具, HostsTool 应用（可跨平台）
 Mac OS | hosts Tool 应用
 Android | Android应用
 Linux | 脚本
@@ -25,10 +25,12 @@ Linux | 脚本
 ### [Android](https://github.com/HostsTools/Android)
 - Android 下的 hosts 更新应用(Java 编写)
 
-### 脚本
-- [**windows.bat**](http://keving.pythonanywhere.com/hosts_scripts/windows.bat)
-  - Windows 环境下的 hosts 一键部署脚本，双击 `windows.bat` 即可更新。
-  - 如有异常，请确认脚本是否为 UTF-8 编码
+### 工具
+
+- [**Windows.zip**](https://github.com/racaljk/hosts/raw/master/tools/windows.zip)
+  - 代替脚本的可执行程序版本，比脚本稍大但是更有鲁棒性
+  - 贡献者:[@Too-Naive](https://github.com/Too-Naive)
+  - Homepage:[HostsTools/Windows](https://github.com/HostsTools/Windows)
 
 - [**lhosts**](http://keving.pythonanywhere.com/hosts_scripts/lhosts)
   - Linux 平台自动部署脚本，使用 `./lhosts -h` 命令获取帮助信息。
