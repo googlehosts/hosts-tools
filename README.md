@@ -2,8 +2,8 @@
 
 平台 | 类型
 --------|---------
-Microsoft Windows |  终端工具, HostsTool 应用（可跨平台）
-Mac OS | hosts Tool 应用
+Microsoft Windows |  终端工具, HostsTool 应用
+Mac OS | Hosts Tool 应用
 Android | Android应用
 Linux | 脚本
 跨平台 | Haskell-终端应用,[**Hozz**](http://ppoffice.github.io/Hozz) 应用 (外部项目)
