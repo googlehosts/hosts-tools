@@ -1,14 +1,27 @@
 #!/bin/bash
 
 hosts_date() {
-    local date=$(git log --date=short "$1" | \
-                        grep -o "[0-9]\+-[0-9]\+-[0-9]\+" -m 1)
+    local repo_date=$(git log --date=short -n1 "$1" | egrep "[0-9]+-[0-9]+-[0-9]+" -o -m1)
+    local cur_date=$(date +%F)
 
-    sed -i "s/[0-9]\+-[0-9]\+-[0-9]\+/$(echo "$date")/" "$1"
+    # detect hosts file changes
+    if git diff --exit-code "$1" > /dev/null; then
+        # hosts file isn't changed.
+        sed -i "s/[0-9]\+-[0-9]\+-[0-9]\+/$(echo "$repo_date")/" "$1"
+    else
+        # hosts file is changed.
+        sed -i "s/[0-9]\+-[0-9]\+-[0-9]\+/$(echo "$cur_date")/" "$1"
+    fi
 }
 
 hosts_line() {
-    dos2unix -q "$1"
+    local your_os=$(uname -s | cut -c 1-5)
+
+    if [ "$your_os" = "MINGW" -o "$your_os" = "CYGWI" ]; then
+        echo -e "Note: Please check line endings in Windows by yourself."
+    else
+        dos2unix -q "$1"
+    fi
 }
 
 hosts_format() {
@@ -21,9 +34,9 @@ hosts_format() {
 if [ "$1" = "" ]; then
     echo -e "Error, requires an argument!\n\n"
     echo -e "Example:\n\ntools/Hindent hosts"
-    exit -1
+    exit 1
 fi
 
+hosts_line "$1"
 hosts_date "$1"
 hosts_format "$1"
-hosts_line "$1"
