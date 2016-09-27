@@ -8,7 +8,7 @@ DATE_BREAK=0
 # 1. check line endings
 #
 chk_line() {
-    local ret=$(dos2unix -id "$1" | grep -o "[0-9]\+")
+    local ret=$(dos2unix -id "$1" | egrep -o "[0-9]+")
 
     echo -e "1. check line endings:\n"
 
@@ -50,18 +50,35 @@ chk_format() {
 # 3. check "Last updated", only used if STRICT_HOSTS_FORMAT already set
 #
 chk_date() {
-    local real_date=$(git log --date=short "$1" | \
-                        grep -o "[0-9]\+-[0-9]\+-[0-9]\+" -m 1)
-    local in_hosts=$(grep -o "[0-9]\+-[0-9]\+-[0-9]\+" "$1")
+    # system date
+    local real_date=$(date +%F)
+    # date in git repo's log
+    local repo_date=$(git log --date=short "$1" | egrep -o "[0-9]+-[0-9]+-[0-9]+" -m 1)
+    # date string in hosts file.
+    local hosts_date=$(egrep -o "[0-9]+-[0-9]+-[0-9]+" "$1")
 
     echo -e "3. check hosts date:\n"
 
-    if [ "$real_date" != "$in_hosts" ]; then
-        echo -e "\033[41mhosts date mismatch, last modified is $real_date, " \
-                "but hosts tells $in_hosts\033[0m\n\n"
-        DATE_BREAK=1
+    # detect hosts file changes
+    if git diff --exit-code "$1" > /dev/null; then
+        # hosts file isn't changed, compare date with git's log.
+        if [ "$repo_date" != "$hosts_date" ]; then
+            echo -e "\033[41mhosts date mismatch, last modified is $repo_date, " \
+                    "but hosts tells $hosts_date\033[0m\n\n"
+            DATE_BREAK=1
+        else
+            echo -e "\033[42mAll is well!\033[0m\n\n"
+        fi
     else
-        echo -e "\033[42mAll is well!\033[0m\n\n"
+        # hosts file is being editing, and not commit yet.
+        # Compare date with system date.
+        if [ "$real_date" != "$hosts_date" ]; then
+            echo -e "\033[41mhosts date mismatch, last modified is $real_date, " \
+                    "but hosts tells $hosts_date\033[0m\n\n"
+            DATE_BREAK=1
+        else
+            echo -e "\033[42mAll is well!\033[0m\n\n"
+        fi
     fi
 }
 
