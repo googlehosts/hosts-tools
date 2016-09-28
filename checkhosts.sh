@@ -87,7 +87,7 @@ result()
 
 if [ -z "$1" ]; then
 	echo "Usage: $0 [your-hosts-file]"
-	exit -1
+	exit 1
 fi
 
 chk_eol "$1"
