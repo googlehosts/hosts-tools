@@ -22,8 +22,8 @@ chk_format()
 {
 	echo -e "- Check hosts format:\n"
 
-	grep -P "\d+\.\d+\.\d+\.\d+" "$1" > 1.txt
-	grep -P "\d+\.\d+\.\d+\.\d+\t\w+" "$1" > 2.txt
+	grep -P "^\d+\.\d+\.\d+\.\d+" "$1" > 1.txt
+	grep -P "^\d+\.\d+\.\d+\.\d+\t\w+" "$1" > 2.txt
 
 	if ! diff 1.txt 2.txt > 0.txt; then
 		echo -e "\n\033[41mhosts format mismatch! " \
