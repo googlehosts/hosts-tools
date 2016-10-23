@@ -33,7 +33,7 @@ chk_format()
 	cat "$1" | grep -Pv "^\s*#" | grep -P "^(\d+\.){3}\d+\t\w" > 2.swp
 
 	if ! diff 1.swp 2.swp > 0.swp; then
-		echo -e "\n\033[41mhosts format mismatch! " \
+		echo -e "\033[41mhosts format mismatch! " \
 			"The following rules should be normalized:\033[0m"
 		cat 0.swp
 		FORMAT_BREAK=1
