@@ -1,5 +1,5 @@
 #!/bin/bash
-# Normalize your hosts file.
+# Normalize hosts file.
 # https://github.com/racaljk/hosts
 
 date_amend()
@@ -9,11 +9,11 @@ date_amend()
 		# hosts file is not changed, correct to git log records.
 		local repo_date=$(git log --date=short -n1 "$1" |
 					grep -Pom1 "\d+-\d+-\d+")
-		perl -pe "s|\d+-\d+-\d+|$repo_date|" "$1" > h.swp
+		perl -pe "s|\d{4}-\d{2}-\d{2}|$repo_date|" "$1" > h.swp
 		mv -f h.swp "$1"
 	else
 		# hosts file has been changed, correct to system date.
-		perl -pe "s|\d+-\d+-\d+|$(date +%F)|" "$1" > h.swp
+		perl -pe "s|\d{4}-\d{2}-\d{2}|$(date +%F)|" "$1" > h.swp
 		mv -f h.swp "$1"
 	fi
 }
@@ -36,7 +36,6 @@ if [ -z "$1" ]; then
 	echo "Usage: $0 [hosts-file]"
 	exit 1
 fi
-
 
 eol_amend "$1"
 date_amend "$1"
