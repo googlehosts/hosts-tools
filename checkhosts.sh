@@ -7,92 +7,76 @@ DATE_BREAK=0
 
 chk_eol()
 {
-	echo -e " * Check line endings:\n"
+	printf "\e[33;1mCheck line endings:\e[0m\n"
 
 	if file "$1" | grep -q "CRLF"; then
-		echo -e "\033[41mDOS line endings have appeared, " \
-			"it must be coverted now!\033[0m\n\n"
+		printf "\e[31mDOS line endings have appeared, "
+		printf "it must be coverted now!\e[0m\n\n"
 		LINE_BREAK=1
 	else
-		echo -e "\033[42mAll is well!\033[0m\n\n"
+		printf "\e[32mAll is well!\e[0m\n\n"
 	fi
 }
 
-# Check TAB on hosts records.
-# Check leading and trailing whitespace.
-#
+# Check TAB, leading and trailing whitespace.
 chk_format()
 {
-	echo -e " * Check hosts format:\n"
+	printf "\e[33;1mCheck hosts format:\e[0m\n"
 
 	# Filter all hosts records.
 	cat "$1" | grep -Pv "^\s*#" | grep -P "(\d+\.){3}\d+" > 1.swp
 	# Trailing whitespace detection.
 	grep -P "[ \t]+$" "$1" >> 1.swp
-	# Filter good format hosts records.
+	# Filter good records.
 	cat "$1" | grep -Pv "^\s*#" | grep -P "^(\d+\.){3}\d+\t\w" > 2.swp
 
 	if ! diff 1.swp 2.swp > 0.swp; then
-		echo -e "\033[41mhosts format mismatch! " \
-			"The following rules should be normalized:\033[0m"
-		cat 0.swp
+		printf "\e[31mhosts format mismatch! "
+		printf "The following rules should be normalized:\e[0m\n"
+		cat 0.swp; printf "\n"
 		FORMAT_BREAK=1
 	else
-		echo -e "\033[42mAll is well!\033[0m"
+		printf "\e[32mAll is well!\e[0m\n\n"
 	fi
 
-	echo -e "\n"
 	rm -f 0.swp 1.swp 2.swp
 }
 
 chk_date()
 {
-	# system date
-	local real_date=$(date +%F)
-	# The last change of the hosts file.
-	local repo_date=$(git log --date=short "$1" | grep -Pom1 "\d+-\d+-\d+")
-	# date string in hosts file.
-	local hosts_date=$(grep -Po "\d+-\d+-\d+" "$1")
+	local sys_date=$(date +%F)
+	local repo_date=$(git log --date=short "$1" |
+					grep -Pom1 "\d{4}-\d{2}-\d{2}")
+	local in_file=$(grep -Po "\d{4}-\d{2}-\d{2}" "$1")
 
-	echo -e " * Check hosts date:\n"
+	printf "\e[33;1mCheck hosts date:\e[0m\n"
 
-	# check if hosts file changes
+	# check if hosts file changes.
 	if git diff --exit-code "$1" &> /dev/null; then
-		# hosts file is not changed, compare file's date with git log.
-		if [ "$repo_date" != "$hosts_date" ]; then
-			echo -e "\033[41mhosts date mismatch, last modified " \
-				"is $repo_date, but hosts tells " \
-				"$hosts_date\033[0m\n\n"
+		# hosts file is not changed.
+		if [ "$repo_date" != "$in_file" ]; then
+			printf "\e[31mhosts date mismatch, last modified "
+			printf "is ${repo_date}, but hosts tells "
+			printf "${in_file}\e[0m\n\n"
 			DATE_BREAK=1
 		else
-			echo -e "\033[42mAll is well!\033[0m\n\n"
+			printf "\e[32mAll is well!\e[0m\n\n"
 		fi
 	else
 		# hosts file is being editing, and has not been committed.
-		# Compare file's date with the system date.
-		if [ "$real_date" != "$hosts_date" ]; then
-			echo -e "\033[41mhosts date mismatch, last modified " \
-				"is $real_date, but hosts tells " \
-				"$hosts_date\033[0m\n\n"
+		if [ "$sys_date" != "$in_file" ]; then
+			printf "\e[31mhosts date mismatch, last modified "
+			printf "is $sys_date, but hosts tells "
+			printf "$in_file\e[0m\n\n"
 			DATE_BREAK=1
 		else
-			echo -e "\033[42mAll is well!\033[0m\n\n"
+			printf "\e[32mAll is well!\e[0m\n\n"
 		fi
 	fi
 }
 
-result()
-{
-	echo -e "Result (1 = yes, 0 = no):\n"
-	echo "line endings break?      [ $LINE_BREAK ]"
-	echo "hosts format mismatch?   [ $FORMAT_BREAK ]"
-	echo "hosts date mismatch?     [ $DATE_BREAK ]"
-
-	exit $(( $LINE_BREAK + $FORMAT_BREAK + $DATE_BREAK ))
-}
-
 if [ -z "$1" ]; then
-	echo "Usage: $0 [hosts-file]"
+	echo "Usage: $0 [file]"
 	exit 4
 fi
 
@@ -100,4 +84,4 @@ chk_eol "$1"
 chk_format "$1"
 chk_date "$1"
 
-result
+exit $(( $LINE_BREAK + $FORMAT_BREAK + $DATE_BREAK ))
