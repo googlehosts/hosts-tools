@@ -4,17 +4,17 @@
 
 date_amend()
 {
-	# check if hosts file changes
+	# check if hosts file changes.
 	if git diff --exit-code "$1" > /dev/null; then
-		# hosts file is not changed, correct to git log records.
-		local repo_date=$(git log --date=short -n1 "$1" |
-					grep -Pom1 "\d+-\d+-\d+")
-		perl -pe "s|\d{4}-\d{2}-\d{2}|$repo_date|" "$1" > h.swp
-		mv -f h.swp "$1"
+		# hosts file has not been modified, change the date
+		# to last commit date.
+		local commit_date=$(git log --pretty=format:"%cd" --date=short -1 "$1")
+
+		perl -i -pe "s|(?<=Last updated: )\d{4}-\d{2}-\d{2}|$commit_date|g" "$1"
 	else
-		# hosts file has been changed, correct to system date.
-		perl -pe "s|\d{4}-\d{2}-\d{2}|$(date +%F)|" "$1" > h.swp
-		mv -f h.swp "$1"
+		# hosts file has been modified but not committed,
+		# change the date to system date.
+		perl -i -pe "s|(?<=Last updated: )\d{4}-\d{2}-\d{2}|$(date +%F)|g" "$1"
 	fi
 }
 
@@ -27,9 +27,9 @@ eol_amend()
 
 style_amend()
 {
-	perl -pe "s|((\d+\.){3}\d+)\s+|\1\t|g" "$1" > h.swp
-	perl -pe "s|^[ \t]+\|[ \t]+$||g" h.swp > "$1"
-	rm -f h.swp
+	perl -i -pe "s|((\d+\.){3}\d+)[ \t]+|\1\t|g" "$1"
+	# Remove leading and trailing whitespace.
+	perl -i -pe "s|^[ \t]+\|[ \t]+$||g" "$1"
 }
 
 if [ -z "$1" ]; then
