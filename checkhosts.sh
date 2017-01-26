@@ -10,7 +10,7 @@ chk_eol()
 	printf "\e[33;1mCheck line endings:\e[0m\n"
 
 	if file "$1" | grep -q "CRLF"; then
-		printf "\e[31mDOS line endings have appeared, "
+		printf "\e[31mERROR: DOS line endings appeared, "
 		printf "it must be coverted now!\e[0m\n\n"
 		EOL_BREAK=1
 	else
@@ -31,8 +31,7 @@ chk_format()
 	grep -Pv "^[ \t]*#" "$1" | grep -P "^(\d+\.){3}\d+\t\w" > 2.swp
 
 	if ! diff 1.swp 2.swp > 0.swp; then
-		printf "\e[31mhosts format mismatch! "
-		printf "The following rules should be normalized:\e[0m\n"
+		printf "\e[31mNOTICE: The following lines should be normalized:\e[0m\n"
 		cat 0.swp; printf "\n"
 		FORMAT_BREAK=1
 	else
@@ -45,7 +44,7 @@ chk_format()
 cmp_date()
 {
 	if [ "$1" != "$2" ]; then
-		printf "\e[31mhosts date mismatch, last modified is $1, "
+		printf "\e[31mNOTICE: The last updated should be $1, "
 		printf "but hosts tells $2\e[0m\n\n"
 		DATE_BREAK=1
 	else
