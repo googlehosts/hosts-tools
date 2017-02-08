@@ -23,7 +23,7 @@
 
 ### 工具
 
-- [**Windows.zip**](https://github.com/racaljk/hosts/raw/master/tools/windows.zip)
+- [**Windows.zip**](https://github.com/HostsTools/Windows/releases)
   - 代替脚本的可执行程序版本，比脚本稍大但是更有鲁棒性
   - 贡献者:[@Too-Naive](https://github.com/Too-Naive)
   - Homepage:[HostsTools/Windows](https://github.com/HostsTools/Windows)
