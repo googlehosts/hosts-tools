@@ -73,11 +73,7 @@ get_hosts()
 	fi
 
 	# Add range mark
-	if [ "$(uname)" == "Darwin" ]; then
-        	sed -e '1 i\'$'\n'"$BEGIN_MARK" -e '$ a\'$'\n'"$END_MARK" "$REMOTE_FILE" > "$swp"
-    	else
-		sed -e "1 i\\$BEGIN_MARK" -e "$ a\\$END_MARK" "$REMOTE_FILE" > "$swp"
-	fi
+	sed -e '1i\'$'\n'"$BEGIN_MARK" -e '$a\'$'\n'"$END_MARK" "$REMOTE_FILE" > "$swp"
 
 	mv -f "$swp" "$REMOTE_FILE"
 }
