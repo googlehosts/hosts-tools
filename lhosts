@@ -1,6 +1,6 @@
 #!/bin/bash
 # Update hosts file from:
-# https://github.com/racaljk/hosts
+# https://github.com/googlehosts/hosts
 #
 
 myname=${0##*/}
@@ -9,8 +9,8 @@ HOSTS="/etc/hosts"
 BACKUP_FILE="/etc/hosts.bak"
 REMOTE_FILE="/tmp/hosts.rmt"
 
-MAIN="https://raw.githubusercontent.com/racaljk/hosts/master/hosts"
-MIRROR="https://coding.net/u/scaffrey/p/hosts/git/raw/master/hosts"
+MAIN="https://raw.githubusercontent.com/googlehosts/hosts/master/hosts-files/hosts"
+MIRROR="https://coding.net/u/scaffrey/p/hosts/git/raw/master/hosts-files/hosts"
 HOSTS_URL="$MAIN"
 
 QUIET_MODE=
