@@ -10,6 +10,8 @@
   - Mac 环境下的 hosts 自动部署应用 (适用于 OS X 10.10 或以上, Swift 编写)
 
 ### Android
+- [后司] (https://github.com/mcxinyu/HouSi)
+  - 后司 是一个可以简单修改 hosts 的 Android 应用，本应用与其代码由 @mcxinyu 创作或维护
 - [AndroidGoogleHost](https://github.com/HostsTools/Android)
 - [Daedalus](https://github.com/iTXTech/Daedalus)
   - 免 Root 使用第三方DNS服务器，自定义hosts和DNSMasq规则（适用于Android 4.0.3 或以上，纯Java编写）
