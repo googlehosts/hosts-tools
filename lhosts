@@ -10,7 +10,8 @@ BACKUP_FILE="/etc/hosts.bak"
 REMOTE_FILE="/tmp/hosts.rmt"
 
 MAIN="https://raw.githubusercontent.com/googlehosts/hosts/master/hosts-files/hosts"
-MIRROR="https://coding.net/u/scaffrey/p/hosts/git/raw/master/hosts-files/hosts"
+#MIRROR="https://coding.net/u/scaffrey/p/hosts/git/raw/master/hosts-files/hosts"
+MIRROR="https://scaffrey.coding.net/p/hosts/d/hosts/git/raw/master/hosts-files/hosts"
 HOSTS_URL="$MAIN"
 
 QUIET_MODE=
